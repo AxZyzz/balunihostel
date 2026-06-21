@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Hostel Register</title>
+<style>
+  :root{
+    --bg:#f4f1ea; --panel:#fffdf8; --ink:#2b2622; --muted:#7a7066;
+    --line:#e3dccf; --accent:#7a4f2b; --accent2:#a9763f;
+    --green:#1f8a4c; --red:#c2362f; --gold:#b8860b; --blue:#2b6cb0;
+    --shadow:0 1px 0 #fff inset, 0 2px 8px rgba(80,60,30,.08);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg); color:var(--ink); font-size:15px; line-height:1.45;
+    -webkit-text-size-adjust:100%;
+  }
+  .screen{display:none}
+  .screen.active{display:block}
+  .hidden{display:none !important}
+
+  /* ---------- login / config ---------- */
+  .center-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+        box-shadow:var(--shadow);padding:24px;width:100%;max-width:420px}
+  .brand{font-size:22px;font-weight:800;letter-spacing:.3px;color:var(--accent)}
+  .brand small{display:block;font-weight:500;color:var(--muted);font-size:13px;margin-top:4px}
+  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:600}
+  input,select,textarea{
+    width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;
+    background:#fff;color:var(--ink);font-size:15px;font-family:inherit
+  }
+  textarea{min-height:64px;resize:vertical}
+  .btn{appearance:none;border:none;border-radius:10px;padding:11px 16px;font-size:15px;
+       font-weight:700;cursor:pointer;background:var(--accent);color:#fff;width:100%}
+  .btn:active{transform:translateY(1px)}
+  .btn.sec{background:#efe7d8;color:var(--accent)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn.sm{width:auto;padding:7px 12px;font-size:13px}
+  .btn.danger{background:var(--red)}
+  .err{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+
+  /* ---------- app shell ---------- */
+  header.bar{position:sticky;top:0;z-index:20;background:var(--accent);color:#fff;
+    padding:10px 14px;display:flex;align-items:center;gap:10px;
+    padding-top:calc(10px + env(safe-area-inset-top))}
+  header.bar .title{font-weight:800;font-size:17px;white-space:nowrap}
+  header.bar .spacer{flex:1}
+  header.bar select{width:auto;background:#fff2;color:#fff;border:1px solid #ffffff55;
+    padding:7px 9px;font-size:13px;font-weight:700}
+  header.bar select option{color:#000}
+  nav.tabs{position:sticky;top:0;z-index:10;display:flex;gap:4px;overflow-x:auto;
+    background:var(--panel);border-bottom:1px solid var(--line);padding:6px 8px;
+    -webkit-overflow-scrolling:touch}
+  nav.tabs button{flex:0 0 auto;border:none;background:transparent;color:var(--muted);
+    font-weight:700;font-size:13.5px;padding:8px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
+  nav.tabs button.on{background:#efe7d8;color:var(--accent)}
+  main{padding:14px;max-width:760px;margin:0 auto}
+  section.tab{display:none}
+  section.tab.on{display:block}
+
+  h2{font-size:18px;margin:4px 0 12px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+         box-shadow:var(--shadow);padding:14px;margin-bottom:14px}
+  .panel h3{margin:0 0 10px;font-size:15px;color:var(--accent)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media(max-width:520px){.row3{grid-template-columns:1fr 1fr}}
+  .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .actions .btn{width:auto;flex:1;min-width:120px}
+
+  .list{display:flex;flex-direction:column;gap:8px}
+  .item{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .item .top{display:flex;align-items:center;gap:8px}
+  .item .name{font-weight:700}
+  .item .meta{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .item .grow{flex:1}
+  .tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .tag.sen{background:#e7eef9;color:var(--blue)}
+  .tag.jun{background:#fdeede;color:var(--accent2)}
+  .tag.green{background:#e3f3e8;color:var(--green)}
+  .tag.red{background:#fbe7e6;color:var(--red)}
+  .tag.gold{background:#f6edd2;color:var(--gold)}
+  .tag.grey{background:#eee;color:#666}
+  .iconbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 9px;
+    font-size:12px;font-weight:700;cursor:pointer;color:var(--ink)}
+
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px}
+  .stat .n{font-size:24px;font-weight:800;color:var(--accent)}
+  .stat .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+
+  /* attendance */
+  .att-row{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
+    border-radius:10px;padding:8px 10px}
+  .att-row .grow{flex:1;min-width:0}
+  .att-row .nm{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .att-row .rm{color:var(--muted);font-size:12px}
+  .seg{display:flex;gap:4px}
+  .seg button{border:1px solid var(--line);background:#fff;color:var(--muted);font-weight:800;
+    width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:14px}
+  .seg button.P.on{background:var(--green);color:#fff;border-color:var(--green)}
+  .seg button.A.on{background:var(--red);color:#fff;border-color:var(--red)}
+  .seg button.L.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+  .msgbox{white-space:pre-wrap;background:#fff;border:1px dashed var(--accent2);border-radius:10px;
+    padding:12px;font-size:13.5px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.5}
+
+  .empty{color:var(--muted);text-align:center;padding:24px;font-size:14px}
+  .muted{color:var(--muted);font-size:12.5px}
+
+  /* toast */
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
+    background:#2b2622;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;
+    opacity:0;pointer-events:none;transition:.2s;z-index:100;max-width:90%}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid #fff6;border-top-color:#fff;
+    border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ================= CONFIG MISSING ================= -->
+<div id="configScreen" class="screen">
+  <div class="center-wrap"><div class="card">
+    <div class="brand">Hostel Register <small>Setup needed</small></div>
+    <p style="font-size:14px;color:var(--muted)">
+      This file is not connected to your database yet. Open <b>index.html</b> in a text editor,
+      find the <code>CONFIG</code> block near the top of the script, and paste your Supabase
+      <b>Project URL</b> and <b>anon key</b>. See <b>SETUP.md</b> for step-by-step help.
+    </p>
+  </div></div>
+</div>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginScreen" class="screen">
+  <div class="center-wrap"><div class="card">
+    <div class="brand">Hostel Register <small>Senior &amp; Junior Wing</small></div>
+    <form id="loginForm">
+      <label>Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password" placeholder="Enter staff password" required />
+      <div style="height:12px"></div>
+      <button class="btn" type="submit" id="loginBtn">Open</button>
+      <div class="err" id="loginErr"></div>
+    </form>
+    <p class="muted" style="margin-top:14px">Use the password your warden gave you. Same data on every device.</p>
+  </div></div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="screen">
+  <header class="bar">
+    <div class="title">🏨 Hostel Register</div>
+    <div class="spacer"></div>
+    <select id="wingFilter" title="Wing filter">
+      <option value="all">Both wings</option>
+      <option value="Senior">Senior</option>
+      <option value="Junior">Junior</option>
+    </select>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="dashboard" class="on">Dashboard</button>
+    <button data-tab="students">Students</button>
+    <button data-tab="attendance">Attendance</button>
+    <button data-tab="fines">Fines</button>
+    <button data-tab="medical">Medical</button>
+    <button data-tab="leave">Leave</button>
+    <button data-tab="defaulters">Defaulters</button>
+    <button data-tab="settings">Settings</button>
+  </nav>
+
+  <main>
+    <!-- DASHBOARD -->
+    <section class="tab on" id="tab-dashboard">
+      <h2>Today at a glance</h2>
+      <div id="dashBody"><div class="empty">Loading…</div></div>
+    </section>
+
+    <!-- STUDENTS -->
+    <section class="tab" id="tab-students">
+      <h2>Students</h2>
+      <div class="panel">
+        <h3 id="stFormTitle">Add new student</h3>
+        <form id="stForm">
+          <input type="hidden" id="st_id" />
+          <div class="row2">
+            <div><label>Wing *</label>
+              <select id="st_wing" required>
+                <option value="Senior">Senior</option>
+                <option value="Junior">Junior</option>
+              </select></div>
+            <div><label>Name *</label><input id="st_name" required /></div>
+          </div>
+          <div class="row3">
+            <div><label>Class</label><input id="st_class" /></div>
+            <div><label>Roll No</label><input id="st_roll" /></div>
+            <div><label>Blood group</label><input id="st_blood" placeholder="O+" /></div>
+          </div>
+          <div class="row2">
+            <div><label>Guardian name</label><input id="st_gname" /></div>
+            <div><label>Guardian phone</label><input id="st_gphone" inputmode="tel" /></div>
+          </div>
+          <label>Address</label><textarea id="st_addr"></textarea>
+          <label>Known medical condition</label><input id="st_med" placeholder="None / Asthma / ..." />
+          <div class="row3">
+            <div><label>Room</label>
+              <input id="st_room" list="roomList" placeholder="G1" />
+              <datalist id="roomList">
+                <option value="G1"></option><option value="G2"></option>
+                <option value="F1"></option><option value="F2"></option>
+              </datalist></div>
+            <div><label>Bed No</label><input id="st_bed" /></div>
+            <div><label>Almirah No</label><input id="st_almirah" /></div>
+          </div>
+          <label>Admission date</label><input id="st_adm" type="date" />
+          <div class="actions">
+            <button class="btn" type="submit" id="stSave">Save student</button>
+            <button class="btn ghost" type="button" id="stReset">Clear</button>
+          </div>
+          <div class="err" id="stErr"></div>
+        </form>
+      </div>
+      <div class="panel">
+        <input id="stSearch" placeholder="Search name, class, room, bed…" />
+        <div style="height:10px"></div>
+        <div class="list" id="stList"></div>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section class="tab" id="tab-attendance">
+      <h2>Attendance</h2>
+      <div class="panel">
+        <div class="row3">
+          <div><label>Date</label><input id="at_date" type="date" /></div>
+          <div><label>Session</label>
+            <select id="at_session"><option>Morning</option><option>Night</option></select></div>
+          <div><label>Wing</label>
+            <select id="at_wing"><option>Senior</option><option>Junior</option></select></div>
+        </div>
+        <div class="actions">
+          <button class="btn sec" type="button" id="atLoad">Load list</button>
+          <button class="btn ghost" type="button" id="atAllPresent">Mark all present</button>
+        </div>
+      </div>
+      <div class="panel" id="atListPanel" style="display:none">
+        <div class="list" id="atList"></div>
+        <div class="actions">
+          <button class="btn" type="button" id="atSave">Save attendance</button>
+        </div>
+        <div class="err" id="atErr"></div>
+      </div>
+      <div class="panel" id="atMsgPanel" style="display:none">
+        <h3>WhatsApp message — paste into the wing's group</h3>
+        <div class="msgbox" id="atMsg"></div>
+        <div class="actions">
+          <button class="btn sec" type="button" id="atCopy">Copy message</button>
+          <button class="btn" type="button" id="atShare">Open WhatsApp</button>
+        </div>
+        <p class="muted">WhatsApp can't auto-pick the group, so it opens with the text ready — tap the correct wing group, then Send.</p>
+      </div>
+    </section>
+
+    <!-- FINES -->
+    <section class="tab" id="tab-fines">
+      <h2>Fines</h2>
+      <div class="panel">
+        <h3>Add fine</h3>
+        <form id="fnForm">
+          <label>Student</label><select id="fn_student" class="studentSel"></select>
+          <div class="row2">
+            <div><label>Amount (₹)</label><input id="fn_amount" type="number" min="0" step="1" required /></div>
+            <div><label>Paid?</label><select id="fn_paid"><option value="false">Unpaid</option><option value="true">Paid</option></select></div>
+          </div>
+          <label>Reason</label><input id="fn_reason" placeholder="Damage / Late / Rule break…" />
+          <label>Collected by</label><input id="fn_by" />
+          <div class="actions"><button class="btn" type="submit">Add fine</button></div>
+          <div class="err" id="fnErr"></div>
+        </form>
+      </div>
+      <div class="panel">
+        <h3>Records <span id="fnTotal" class="muted"></span></h3>
+        <div class="list" id="fnList"></div>
+      </div>
+    </section>
+
+    <!-- MEDICAL -->
+    <section class="tab" id="tab-medical">
+      <h2>Medical</h2>
+      <div class="panel">
+        <h3>Add medical record</h3>
+        <form id="mdForm">
+          <label>Student</label><select id="md_student" class="studentSel"></select>
+          <div class="row2">
+            <div><label>Condition</label><input id="md_cond" /></div>
+            <div><label>Severity</label><select id="md_sev"><option>Low</option><option>Medium</option><option>High</option></select></div>
+          </div>
+          <label>Treatment given</label><textarea id="md_treat"></textarea>
+          <div class="actions"><button class="btn" type="submit">Add record</button></div>
+          <div class="err" id="mdErr"></div>
+        </form>
+      </div>
+      <div class="panel"><h3>Records</h3><div class="list" id="mdList"></div></div>
+    </section>
+
+    <!-- LEAVE -->
+    <section class="tab" id="tab-leave">
+      <h2>Leave</h2>
+      <div class="panel">
+        <h3>Add leave</h3>
+        <form id="lvForm">
+          <label>Student</label><select id="lv_student" class="studentSel"></select>
+          <div class="row2">
+            <div><label>From</label><input id="lv_from" type="date" required /></div>
+            <div><label>To</label><input id="lv_to" type="date" required /></div>
+          </div>
+          <div class="row2">
+            <div><label>Reason</label><input id="lv_reason" /></div>
+            <div><label>Going to</label><input id="lv_dest" /></div>
+          </div>
+          <label>Approved by</label><input id="lv_by" />
+          <div class="actions"><button class="btn" type="submit">Add leave</button></div>
+          <div class="err" id="lvErr"></div>
+        </form>
+      </div>
+      <div class="panel"><h3>Records</h3><div class="list" id="lvList"></div></div>
+    </section>
+
+    <!-- DEFAULTERS -->
+    <section class="tab" id="tab-defaulters">
+      <h2>Defaulters</h2>
+      <div class="panel">
+        <h3>Add defaulter</h3>
+        <form id="dfForm">
+          <label>Student</label><select id="df_student" class="studentSel"></select>
+          <label>Violation</label><input id="df_violation" placeholder="Absent without leave / fight / …" />
+          <label>Action taken</label><input id="df_action" />
+          <div class="actions"><button class="btn" type="submit">Add</button></div>
+          <div class="err" id="dfErr"></div>
+        </form>
+      </div>
+      <div class="panel"><h3>Records</h3><div class="list" id="dfList"></div></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="tab" id="tab-settings">
+      <h2>Settings</h2>
+      <div class="panel">
+        <h3>Change shared password</h3>
+        <form id="pwForm">
+          <label>New password</label><input id="pw_new" type="password" minlength="6" required />
+          <label>Confirm new password</label><input id="pw_conf" type="password" minlength="6" required />
+          <div class="actions"><button class="btn" type="submit">Update password</button></div>
+          <div class="err" id="pwErr"></div>
+          <p class="muted">Everyone shares one password. After you change it, tell the staff the new one and ask them to log in again.</p>
+        </form>
+      </div>
+      <div class="panel">
+        <h3>Session</h3>
+        <button class="btn danger" type="button" id="logoutBtn">Log out</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   CONFIG  —  paste your two Supabase values here (see SETUP.md)
+   ============================================================ */
+const SUPABASE_URL      = "https://bycpckezurktamehbgje.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5Y3Bja2V6dXJrdGFtZWhiZ2plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMjkwNTgsImV4cCI6MjA5NzYwNTA1OH0.M3h-mBeEVPJBB_kOH_GQf6Uj0D_7ljGSus0dvN4d7-c";
+const HOSTEL_EMAIL      = "staff@hostel.app";   // the shared login email (set in Supabase Auth)
+/* ============================================================ */
+
+let sb = null;
+let STUDENTS = [];          // cached student list
+let attendanceState = [];   // [{id,name,room,wing,status}]
+
+/* ---------- tiny helpers ---------- */
+const $  = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+function show(id){ $$(".screen").forEach(s=>s.classList.remove("active")); $("#"+id).classList.add("active"); }
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),2200); }
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function todayStr(){ return new Date().toLocaleDateString("en-CA"); } // YYYY-MM-DD local
+function fmtDate(d){ if(!d) return ""; const p=String(d).slice(0,10).split("-"); return p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : d; }
+function wingTag(w){ return w==="Senior" ? '<span class="tag sen">Senior</span>' : w==="Junior" ? '<span class="tag jun">Junior</span>' : ""; }
+
+/* ---------- boot ---------- */
+window.addEventListener("DOMContentLoaded", init);
+
+async function init(){
+  if(!SUPABASE_URL || SUPABASE_URL.indexOf("PASTE_")===0 || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.indexOf("PASTE_")===0){
+    show("configScreen"); return;
+  }
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session) enterApp(); else show("loginScreen");
+}
+
+/* ---------- auth ---------- */
+$("#loginForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const btn=$("#loginBtn"), err=$("#loginErr");
+  err.textContent=""; btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  const { error } = await sb.auth.signInWithPassword({ email:HOSTEL_EMAIL, password:$("#loginPass").value });
+  btn.disabled=false; btn.textContent="Open";
+  if(error){ err.textContent = "Wrong password (or login not set up yet). "+error.message; return; }
+  $("#loginPass").value=""; enterApp();
+});
+
+$("#logoutBtn").addEventListener("click", async ()=>{ await sb.auth.signOut(); location.reload(); });
+
+async function enterApp(){
+  show("app");
+  await loadStudents();
+  setTab("dashboard");
+  $("#at_date").value = todayStr();
+}
+
+/* ---------- tabs ---------- */
+$("#tabs").addEventListener("click",(e)=>{ const b=e.target.closest("button"); if(b) setTab(b.dataset.tab); });
+function setTab(name){
+  $$("#tabs button").forEach(b=>b.classList.toggle("on", b.dataset.tab===name));
+  $$("section.tab").forEach(s=>s.classList.toggle("on", s.id==="tab-"+name));
+  if(name==="dashboard") renderDashboard();
+  if(name==="students")  renderStudents();
+  if(name==="fines")     loadFines();
+  if(name==="medical")   loadMedical();
+  if(name==="leave")     loadLeave();
+  if(name==="defaulters")loadDefaulters();
+}
+$("#wingFilter").addEventListener("change",()=>{
+  const cur = $$("#tabs button.on")[0]?.dataset.tab;
+  if(cur==="dashboard") renderDashboard();
+  if(cur==="students")  renderStudents();
+});
+function wingSel(){ return $("#wingFilter").value; } // 'all'|'Senior'|'Junior'
+
+/* ============================================================
+   STUDENTS
+   ============================================================ */
+async function loadStudents(){
+  const { data, error } = await sb.from("students").select("*").order("name");
+  if(error){ toast("Load failed: "+error.message); return; }
+  STUDENTS = data||[];
+  fillStudentSelects();
+}
+
+function fillStudentSelects(){
+  const opts = '<option value="">— select student —</option>' +
+    STUDENTS.map(s=>`<option value="${s.id}">${esc(s.name)} · ${esc(s.wing)}${s.room?` · ${esc(s.room)}`:""}</option>`).join("");
+  $$(".studentSel").forEach(sel=>{ const v=sel.value; sel.innerHTML=opts; sel.value=v; });
+}
+
+function renderStudents(){
+  const q = ($("#stSearch").value||"").toLowerCase();
+  const wf = wingSel();
+  const rows = STUDENTS.filter(s=>{
+    if(wf!=="all" && s.wing!==wf) return false;
+    if(!q) return true;
+    return [s.name,s.class,s.room,s.bed_no,s.almirah_no,s.guardian_name].some(v=>(v||"").toLowerCase().includes(q));
+  });
+  const el=$("#stList");
+  if(!rows.length){ el.innerHTML='<div class="empty">No students yet. Add one above.</div>'; return; }
+  el.innerHTML = rows.map(s=>`
+    <div class="item">
+      <div class="top">
+        <div class="grow">
+          <div class="name">${esc(s.name)} ${wingTag(s.wing)}</div>
+          <div class="meta">
+            ${s.class?`Class ${esc(s.class)} · `:""}${s.room?`Room ${esc(s.room)} · `:""}${s.bed_no?`Bed ${esc(s.bed_no)} · `:""}${s.almirah_no?`Almirah ${esc(s.almirah_no)}`:""}
+          </div>
+          <div class="meta">
+            ${s.guardian_name?`G: ${esc(s.guardian_name)} `:""}${s.guardian_phone?`(${esc(s.guardian_phone)}) `:""}${s.blood_group?`· ${esc(s.blood_group)} `:""}${s.medical_condition && s.medical_condition.toLowerCase()!=="none"?`· ⚕ ${esc(s.medical_condition)}`:""}
+          </div>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:8px">
+        <button class="iconbtn" onclick="editStudent('${s.id}')">Edit</button>
+        <button class="iconbtn" onclick="deleteStudent('${s.id}')">Delete</button>
+      </div>
+    </div>`).join("");
+}
+$("#stSearch").addEventListener("input", renderStudents);
+
+function studentForm(){
+  return {
+    wing:$("#st_wing").value, name:$("#st_name").value.trim(), class:$("#st_class").value.trim(),
+    roll_no:$("#st_roll").value.trim(), guardian_name:$("#st_gname").value.trim(),
+    guardian_phone:$("#st_gphone").value.trim(), address:$("#st_addr").value.trim(),
+    blood_group:$("#st_blood").value.trim(), medical_condition:$("#st_med").value.trim(),
+    room:$("#st_room").value.trim(), bed_no:$("#st_bed").value.trim(),
+    almirah_no:$("#st_almirah").value.trim(),
+    admission_date: $("#st_adm").value || null
+  };
+}
+
+function checkConflict(f, excludeId){
+  // double-booking guard within the same wing + room
+  for(const s of STUDENTS){
+    if(excludeId && s.id===excludeId) continue;
+    if(s.wing!==f.wing || !f.room || s.room!==f.room) continue;
+    if(f.bed_no && s.bed_no===f.bed_no) return `Bed ${f.bed_no} in ${f.wing} room ${f.room} is already given to ${s.name}.`;
+    if(f.almirah_no && s.almirah_no===f.almirah_no) return `Almirah ${f.almirah_no} in ${f.wing} room ${f.room} is already given to ${s.name}.`;
+  }
+  return null;
+}
+
+$("#stForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const err=$("#stErr"); err.textContent="";
+  const id=$("#st_id").value;
+  const f=studentForm();
+  if(!f.name){ err.textContent="Name is required."; return; }
+  const conflict=checkConflict(f, id||null);
+  if(conflict && !confirm(conflict+"\n\nSave anyway?")) return;
+  const btn=$("#stSave"); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  let res;
+  if(id) res=await sb.from("students").update(f).eq("id",id);
+  else   res=await sb.from("students").insert(f);
+  btn.disabled=false; btn.textContent="Save student";
+  if(res.error){ err.textContent=res.error.message; return; }
+  toast(id?"Student updated":"Student added");
+  resetStudentForm();
+  await loadStudents(); renderStudents();
+});
+
+window.editStudent=(id)=>{
+  const s=STUDENTS.find(x=>x.id===id); if(!s) return;
+  $("#st_id").value=s.id; $("#st_wing").value=s.wing||"Senior"; $("#st_name").value=s.name||"";
+  $("#st_class").value=s.class||""; $("#st_roll").value=s.roll_no||""; $("#st_blood").value=s.blood_group||"";
+  $("#st_gname").value=s.guardian_name||""; $("#st_gphone").value=s.guardian_phone||"";
+  $("#st_addr").value=s.address||""; $("#st_med").value=s.medical_condition||"";
+  $("#st_room").value=s.room||""; $("#st_bed").value=s.bed_no||""; $("#st_almirah").value=s.almirah_no||"";
+  $("#st_adm").value=s.admission_date||"";
+  $("#stFormTitle").textContent="Edit student";
+  window.scrollTo({top:0,behavior:"smooth"});
+};
+window.deleteStudent=async (id)=>{
+  const s=STUDENTS.find(x=>x.id===id); if(!s) return;
+  if(!confirm(`Delete ${s.name}? This also removes their attendance history.`)) return;
+  const { error }=await sb.from("students").delete().eq("id",id);
+  if(error){ toast(error.message); return; }
+  toast("Deleted"); await loadStudents(); renderStudents();
+};
+function resetStudentForm(){ $("#stForm").reset(); $("#st_id").value=""; $("#stFormTitle").textContent="Add new student"; }
+$("#stReset").addEventListener("click", resetStudentForm);
+
+/* ============================================================
+   ATTENDANCE
+   ============================================================ */
+$("#atLoad").addEventListener("click", loadAttendance);
+$("#atAllPresent").addEventListener("click", ()=>{ attendanceState.forEach(r=>r.status="Present"); renderAttendance(); });
+
+async function loadAttendance(){
+  const wing=$("#at_wing").value, date=$("#at_date").value, session=$("#at_session").value;
+  if(!date){ toast("Pick a date"); return; }
+  const roster = STUDENTS.filter(s=>s.wing===wing);
+  if(!roster.length){ $("#atListPanel").style.display="block"; $("#atList").innerHTML='<div class="empty">No students in '+esc(wing)+' wing yet.</div>'; $("#atMsgPanel").style.display="none"; return; }
+  // existing marks for this date/session
+  const { data:existing } = await sb.from("attendance").select("student_id,status")
+      .eq("date",date).eq("session",session).eq("wing",wing);
+  const prior={}; (existing||[]).forEach(r=>prior[r.student_id]=r.status);
+  attendanceState = roster.map(s=>({ id:s.id, name:s.name, room:s.room, wing:s.wing, status: prior[s.id]||"Present" }));
+  renderAttendance();
+  $("#atMsgPanel").style.display="none";
+}
+
+function renderAttendance(){
+  $("#atListPanel").style.display="block";
+  $("#atList").innerHTML = attendanceState.map((r,i)=>`
+    <div class="att-row">
+      <div class="grow"><div class="nm">${esc(r.name)}</div><div class="rm">${r.room?"Room "+esc(r.room):"—"}</div></div>
+      <div class="seg">
+        <button class="P ${r.status==="Present"?"on":""}" onclick="setAtt(${i},'Present')">P</button>
+        <button class="A ${r.status==="Absent"?"on":""}" onclick="setAtt(${i},'Absent')">A</button>
+        <button class="L ${r.status==="Leave"?"on":""}" onclick="setAtt(${i},'Leave')">L</button>
+      </div>
+    </div>`).join("");
+}
+window.setAtt=(i,st)=>{ attendanceState[i].status=st; renderAttendance(); };
+
+$("#atSave").addEventListener("click", async ()=>{
+  const err=$("#atErr"); err.textContent="";
+  if(!attendanceState.length){ err.textContent="Load a list first."; return; }
+  const wing=$("#at_wing").value, date=$("#at_date").value, session=$("#at_session").value;
+  const rows=attendanceState.map(r=>({
+    date, session, wing, student_id:r.id, student_name:r.name, room:r.room||null, status:r.status
+  }));
+  const btn=$("#atSave"); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  const { error }=await sb.from("attendance").upsert(rows,{ onConflict:"date,session,student_id" });
+  btn.disabled=false; btn.textContent="Save attendance";
+  if(error){ err.textContent=error.message; return; }
+  toast("Attendance saved");
+  buildWhatsApp(wing,date,session);
+});
+
+function buildWhatsApp(wing,date,session){
+  const tot=attendanceState.length;
+  const present=attendanceState.filter(r=>r.status==="Present").length;
+  const absent=attendanceState.filter(r=>r.status==="Absent");
+  const leave=attendanceState.filter(r=>r.status==="Leave");
+  const nm=r=>r.name+(r.room?` (${r.room})`:"");
+  let m=`🏨 ${wing} Wing Hostel\n📅 ${fmtDate(date)} · ${session} Attendance\n`;
+  m+=`👥 Total ${tot} · ✅ Present ${present} · ❌ Absent ${absent.length} · 🌴 Leave ${leave.length}\n`;
+  if(absent.length) m+=`\n❌ Absent: ${absent.map(nm).join(", ")}`;
+  if(leave.length)  m+=`\n🌴 On leave: ${leave.map(nm).join(", ")}`;
+  if(!absent.length && !leave.length) m+=`\n🎉 All present.`;
+  $("#atMsg").textContent=m;
+  $("#atMsgPanel").style.display="block";
+  $("#atMsgPanel").dataset.msg=m;
+  $("#atMsgPanel").scrollIntoView({behavior:"smooth"});
+}
+$("#atCopy").addEventListener("click", async ()=>{
+  const m=$("#atMsgPanel").dataset.msg||"";
+  try{ await navigator.clipboard.writeText(m); toast("Copied — paste into the group"); }
+  catch{ toast("Press and hold the text to copy"); }
+});
+$("#atShare").addEventListener("click", ()=>{
+  const m=$("#atMsgPanel").dataset.msg||"";
+  window.open("https://wa.me/?text="+encodeURIComponent(m),"_blank");
+});
+
+/* ============================================================
+   FINES
+   ============================================================ */
+$("#fnForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const err=$("#fnErr"); err.textContent="";
+  const s=STUDENTS.find(x=>x.id===$("#fn_student").value);
+  if(!s){ err.textContent="Pick a student."; return; }
+  const rec={ student_id:s.id, student_name:s.name, wing:s.wing,
+    amount:Number($("#fn_amount").value)||0, reason:$("#fn_reason").value.trim(),
+    paid: $("#fn_paid").value==="true", collected_by:$("#fn_by").value.trim(), date:todayStr() };
+  const { error }=await sb.from("fines").insert(rec);
+  if(error){ err.textContent=error.message; return; }
+  toast("Fine added"); e.target.reset(); loadFines();
+});
+async function loadFines(){
+  const { data, error }=await sb.from("fines").select("*").order("created_at",{ascending:false});
+  if(error){ $("#fnList").innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
+  const unpaid=(data||[]).filter(f=>!f.paid).reduce((a,f)=>a+Number(f.amount||0),0);
+  $("#fnTotal").textContent = `· Unpaid ₹${unpaid}`;
+  const el=$("#fnList");
+  if(!data||!data.length){ el.innerHTML='<div class="empty">No fines yet.</div>'; return; }
+  el.innerHTML=data.map(f=>`
+    <div class="item"><div class="top">
+      <div class="grow">
+        <div class="name">${esc(f.student_name)} ${wingTag(f.wing)} <span class="tag ${f.paid?"green":"red"}">${f.paid?"Paid":"Unpaid"}</span></div>
+        <div class="meta">₹${esc(f.amount)} · ${esc(f.reason||"—")} · ${fmtDate(f.date)}${f.collected_by?` · by ${esc(f.collected_by)}`:""}</div>
+      </div>
+    </div>
+    <div class="actions" style="margin-top:8px">
+      <button class="iconbtn" onclick="toggleFine('${f.id}',${f.paid})">${f.paid?"Mark unpaid":"Mark paid"}</button>
+      <button class="iconbtn" onclick="delRec('fines','${f.id}',loadFines)">Delete</button>
+    </div></div>`).join("");
+}
+window.toggleFine=async (id,paid)=>{ const {error}=await sb.from("fines").update({paid:!paid}).eq("id",id); if(error){toast(error.message);return;} loadFines(); };
+
+/* ============================================================
+   MEDICAL
+   ============================================================ */
+$("#mdForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const err=$("#mdErr"); err.textContent="";
+  const s=STUDENTS.find(x=>x.id===$("#md_student").value);
+  if(!s){ err.textContent="Pick a student."; return; }
+  const rec={ student_id:s.id, student_name:s.name, wing:s.wing, condition:$("#md_cond").value.trim(),
+    treatment:$("#md_treat").value.trim(), severity:$("#md_sev").value, date:todayStr() };
+  const { error }=await sb.from("medical").insert(rec);
+  if(error){ err.textContent=error.message; return; }
+  toast("Medical record added"); e.target.reset(); loadMedical();
+});
+async function loadMedical(){
+  const { data, error }=await sb.from("medical").select("*").order("created_at",{ascending:false});
+  const el=$("#mdList");
+  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
+  if(!data||!data.length){ el.innerHTML='<div class="empty">No records yet.</div>'; return; }
+  const sevTag=s=>s==="High"?"red":s==="Medium"?"gold":"grey";
+  el.innerHTML=data.map(m=>`
+    <div class="item"><div class="top"><div class="grow">
+      <div class="name">${esc(m.student_name)} ${wingTag(m.wing)} <span class="tag ${sevTag(m.severity)}">${esc(m.severity||"—")}</span></div>
+      <div class="meta">${esc(m.condition||"—")} · ${fmtDate(m.date)}</div>
+      ${m.treatment?`<div class="meta">Rx: ${esc(m.treatment)}</div>`:""}
+    </div></div>
+    <div class="actions" style="margin-top:8px"><button class="iconbtn" onclick="delRec('medical','${m.id}',loadMedical)">Delete</button></div></div>`).join("");
+}
+
+/* ============================================================
+   LEAVE
+   ============================================================ */
+$("#lvForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const err=$("#lvErr"); err.textContent="";
+  const s=STUDENTS.find(x=>x.id===$("#lv_student").value);
+  if(!s){ err.textContent="Pick a student."; return; }
+  if($("#lv_to").value < $("#lv_from").value){ err.textContent="'To' date is before 'From' date."; return; }
+  const rec={ student_id:s.id, student_name:s.name, wing:s.wing, from_date:$("#lv_from").value,
+    to_date:$("#lv_to").value, reason:$("#lv_reason").value.trim(), destination:$("#lv_dest").value.trim(),
+    approved_by:$("#lv_by").value.trim() };
+  const { error }=await sb.from("leaves").insert(rec);
+  if(error){ err.textContent=error.message; return; }
+  toast("Leave added"); e.target.reset(); loadLeave();
+});
+async function loadLeave(){
+  const { data, error }=await sb.from("leaves").select("*").order("from_date",{ascending:false});
+  const el=$("#lvList"); const today=todayStr();
+  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
+  if(!data||!data.length){ el.innerHTML='<div class="empty">No leave records.</div>'; return; }
+  el.innerHTML=data.map(l=>{
+    const active = l.from_date<=today && today<=l.to_date;
+    return `<div class="item"><div class="top"><div class="grow">
+      <div class="name">${esc(l.student_name)} ${wingTag(l.wing)} ${active?'<span class="tag gold">On leave now</span>':""}</div>
+      <div class="meta">${fmtDate(l.from_date)} → ${fmtDate(l.to_date)} · ${esc(l.reason||"—")}${l.destination?` · to ${esc(l.destination)}`:""}</div>
+      ${l.approved_by?`<div class="meta">Approved by ${esc(l.approved_by)}</div>`:""}
+    </div></div>
+    <div class="actions" style="margin-top:8px"><button class="iconbtn" onclick="delRec('leaves','${l.id}',loadLeave)">Delete</button></div></div>`;
+  }).join("");
+}
+
+/* ============================================================
+   DEFAULTERS
+   ============================================================ */
+$("#dfForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const err=$("#dfErr"); err.textContent="";
+  const s=STUDENTS.find(x=>x.id===$("#df_student").value);
+  if(!s){ err.textContent="Pick a student."; return; }
+  const rec={ student_id:s.id, student_name:s.name, wing:s.wing, violation:$("#df_violation").value.trim(),
+    action:$("#df_action").value.trim(), resolved:false, date:todayStr() };
+  const { error }=await sb.from("defaulters").insert(rec);
+  if(error){ err.textContent=error.message; return; }
+  toast("Defaulter added"); e.target.reset(); loadDefaulters();
+});
+async function loadDefaulters(){
+  const { data, error }=await sb.from("defaulters").select("*").order("created_at",{ascending:false});
+  const el=$("#dfList");
+  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
+  if(!data||!data.length){ el.innerHTML='<div class="empty">No defaulters.</div>'; return; }
+  el.innerHTML=data.map(d=>`
+    <div class="item"><div class="top"><div class="grow">
+      <div class="name">${esc(d.student_name)} ${wingTag(d.wing)} <span class="tag ${d.resolved?"green":"red"}">${d.resolved?"Resolved":"Open"}</span></div>
+      <div class="meta">${esc(d.violation||"—")} · ${fmtDate(d.date)}</div>
+      ${d.action?`<div class="meta">Action: ${esc(d.action)}</div>`:""}
+    </div></div>
+    <div class="actions" style="margin-top:8px">
+      <button class="iconbtn" onclick="toggleDef('${d.id}',${d.resolved})">${d.resolved?"Reopen":"Mark resolved"}</button>
+      <button class="iconbtn" onclick="delRec('defaulters','${d.id}',loadDefaulters)">Delete</button>
+    </div></div>`).join("");
+}
+window.toggleDef=async (id,r)=>{ const {error}=await sb.from("defaulters").update({resolved:!r}).eq("id",id); if(error){toast(error.message);return;} loadDefaulters(); };
+
+/* generic delete */
+window.delRec=async (table,id,reload)=>{ if(!confirm("Delete this record?")) return; const {error}=await sb.from(table).delete().eq("id",id); if(error){toast(error.message);return;} toast("Deleted"); reload(); };
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+async function renderDashboard(){
+  const wf=wingSel(); const today=todayStr();
+  const el=$("#dashBody"); el.innerHTML='<div class="empty">Loading…</div>';
+
+  const inWing=s=>wf==="all"||s.wing===wf;
+  const sen=STUDENTS.filter(s=>s.wing==="Senior").length;
+  const jun=STUDENTS.filter(s=>s.wing==="Junior").length;
+  const totalStudents=STUDENTS.filter(inWing).length;
+
+  // pull today's data in parallel
+  const [att, fines, defs, lvs] = await Promise.all([
+    sb.from("attendance").select("session,wing,status").eq("date",today),
+    sb.from("fines").select("amount,paid,wing").eq("paid",false),
+    sb.from("defaulters").select("wing").eq("resolved",false),
+    sb.from("leaves").select("wing,from_date,to_date")
+  ]);
+  const A=(att.data||[]).filter(inWing);
+  const cnt=(ses,st)=>A.filter(r=>r.session===ses&&r.status===st).length;
+  const unpaid=(fines.data||[]).filter(inWing).reduce((a,f)=>a+Number(f.amount||0),0);
+  const openDef=(defs.data||[]).filter(inWing).length;
+  const onLeave=(lvs.data||[]).filter(l=>inWing(l)&&l.from_date<=today&&today<=l.to_date).length;
+
+  function sessLine(ses){
+    const has=A.some(r=>r.session===ses);
+    if(!has) return `<div class="meta">${ses}: <span class="tag grey">not taken yet</span></div>`;
+    return `<div class="meta">${ses}: <b>${cnt(ses,"Present")}</b> present · ${cnt(ses,"Absent")} absent · ${cnt(ses,"Leave")} leave</div>`;
+  }
+
+  el.innerHTML=`
+    <div class="panel">
+      <h3>Students</h3>
+      <div class="stats">
+        <div class="stat"><div class="n">${totalStudents}</div><div class="l">${wf==="all"?"Total students":wf+" wing"}</div></div>
+        <div class="stat"><div class="n">${sen} / ${jun}</div><div class="l">Senior / Junior</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Today's attendance · ${fmtDate(today)}</h3>
+      ${sessLine("Morning")}
+      ${sessLine("Night")}
+    </div>
+    <div class="panel">
+      <div class="stats">
+        <div class="stat"><div class="n">₹${unpaid}</div><div class="l">Unpaid fines</div></div>
+        <div class="stat"><div class="n">${openDef}</div><div class="l">Open defaulters</div></div>
+        <div class="stat"><div class="n">${onLeave}</div><div class="l">On leave now</div></div>
+        <div class="stat"><div class="n">${STUDENTS.filter(s=>inWing(s)&&s.medical_condition&&s.medical_condition.toLowerCase()!=="none"&&s.medical_condition!=="").length}</div><div class="l">Medical flags</div></div>
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   SETTINGS — change shared password
+   ============================================================ */
+$("#pwForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const err=$("#pwErr"); err.textContent="";
+  if($("#pw_new").value!==$("#pw_conf").value){ err.textContent="Passwords don't match."; return; }
+  const { error }=await sb.auth.updateUser({ password:$("#pw_new").value });
+  if(error){ err.textContent=error.message; return; }
+  $("#pwForm").reset();
+  toast("Password updated");
+});
+</script>
+</body>
+</html>
