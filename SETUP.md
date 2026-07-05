@@ -1,114 +1,79 @@
-# Hostel Register — Setup Guide
+# Baluni Hostel Management (v3) — Setup Guide
 
-A shared hostel app: one live database, opens on any phone or computer, protected by one
-staff password. Built for two wings (Senior + Junior), with attendance, fines, medical, leave
-and defaulter records, plus a WhatsApp message builder.
+Role-based hostel management for **Baluni School of Competition, Farah, Mathura**.
+Works on any phone, tablet, laptop or desktop from one link. Professional light UI.
 
-You set it up **once**. After that, staff just open a link and type the password.
+**Two logins:**
 
----
+| Role | Login | Can do |
+|---|---|---|
+| **Principal** | Principal + password | Everything — student records, edits, deletes, password change |
+| **Warden** | Warden + password | Entry work only — attendance, leave, outpass, medical, discipline, fines, complaints, parent calls |
 
-## What you need (all free)
-1. A **Supabase** account (free) — this is the cloud database.
-2. A **Netlify** or **GitHub Pages** account (free) — this hosts the page so it has a real link.
-
-Total time: ~15 minutes, one time.
-
----
-
-## Step 1 — Create the database (Supabase)
-
-1. Go to **https://supabase.com** → **Start your project** → sign in with Google.
-2. Click **New project**. Give it a name (e.g. `hostel`), set a database password (save it
-   somewhere — you won't need it daily), pick the nearest region, click **Create**.
-3. Wait ~1 minute for it to finish setting up.
-
-### 1a. Create the tables
-1. In the left menu click **SQL Editor** → **New query**.
-2. Open the file **schema.sql** (sent with this app), copy **all** of it, paste into the box.
-3. Click **Run**. You should see *Success*. (This creates all the tables and the security rules.)
-
-### 1b. Create the one shared staff login
-1. Left menu → **Authentication** → **Users** → **Add user** → **Create new user**.
-2. Email: type exactly **staff@hostel.app**
-   (this exact email is what the app logs in with — don't change it unless you also change it
-   in the app file, see Step 3).
-3. Password: choose the **staff password** you'll give your team (at least 6 characters).
-4. Tick **Auto Confirm User** if shown, then **Create user**.
-
-> This is the password your staff type to open the app. You can change it later from inside
-> the app (Settings → Change password) or here in Supabase.
-
-### 1c. Copy your two connection values
-1. Left menu → **Project Settings** (gear icon) → **API**.
-2. Copy two things:
-   - **Project URL** (looks like `https://abcdxyz.supabase.co`)
-   - **anon public** key (a long string under *Project API keys*)
-
-Keep these two for Step 3.
+Wardens **cannot** open student files (address, parent phones, medical details are blocked at the
+database level, not just hidden), cannot edit or delete records, and have no password controls.
 
 ---
 
-## Step 2 — (already done) the app file
-You have **index.html**. That's the whole app — one file.
+## Step 1 — Database (Supabase)
 
----
+Your Supabase project already exists (`bycpckezurktamehbgje`). Two scripts to run:
 
-## Step 3 — Put your two values into the app
-1. Open **index.html** in any text editor (Notepad works).
-2. Near the top of the `<script>` section you'll see this **CONFIG** block:
+1. Supabase Dashboard → **SQL Editor** → New query → paste ALL of **schema_v3.sql** → **Run**.
+   This upgrades your database: adds outpass, discipline, complaints, parent-call tables,
+   parent phone columns, and the role security rules. It never deletes existing data.
+2. Paste ALL of **create_logins.sql** → **Run**. This creates both logins
+   (and if they already exist, it just resets their passwords):
 
-   ```js
-   const SUPABASE_URL      = "PASTE_YOUR_SUPABASE_URL_HERE";
-   const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE";
-   const HOSTEL_EMAIL      = "staff@hostel.app";
-   ```
+   | Role | Email | Password |
+   |---|---|---|
+   | Warden | `staff@hostel.app` | `staff@123` |
+   | Principal | `principal@hostel.app` | `principalbaluni@321` |
 
-3. Replace `PASTE_YOUR_SUPABASE_URL_HERE` with your **Project URL** (keep the quotes).
-4. Replace `PASTE_YOUR_ANON_KEY_HERE` with your **anon public** key (keep the quotes).
-5. Leave `HOSTEL_EMAIL` as `staff@hostel.app` (must match the user you made in Step 1b).
-6. Save the file.
+   Safe to re-run any time you forget a password. Change the Principal password from the app
+   (Settings) once things are running. (`setup_v2.sql` is old — ignore it; this replaces it.)
 
----
+## Step 2 — The app file
 
-## Step 4 — Host it (pick ONE)
+**index.html** already contains your project URL and key — nothing to paste.
+(If you ever move to a new Supabase project, update the CONFIG block at the top of the script.)
 
-### Option A — Netlify Drop (easiest, no GitHub)
-1. Go to **https://app.netlify.com/drop**.
-2. Drag your **index.html** onto the page (or a folder containing it).
-3. It instantly gives you a link like `https://something.netlify.app`. That's your app.
-4. (Optional) In Netlify → Site settings you can rename it to something tidier.
+## Step 3 — Host it
 
-### Option B — GitHub + Netlify
-1. Create a new GitHub repository, upload **index.html** (and schema.sql / SETUP.md if you like).
-2. In Netlify → **Add new site → Import from GitHub** → pick the repo → **Deploy**.
-3. Netlify watches GitHub, so future edits you push update the live site automatically.
+- **Netlify Drop** (easiest): https://app.netlify.com/drop → drag **index.html** → get your link.
+- **GitHub + Netlify**: push the repo, import in Netlify → auto-deploys on every change.
 
----
+## Step 4 — Daily use
 
-## Step 5 — Use it
-1. Open the link. Type the **staff password** (from Step 1b). You're in.
-2. **Students** tab → add students (pick wing, room, bed, almirah — it warns on clashes).
-3. **Attendance** tab → pick date + session + wing → **Load list** → tap P/A/L → **Save** →
-   then **Copy message** / **Open WhatsApp**, and paste into that wing's group.
-4. **Fines / Medical / Leave / Defaulters** tabs → add records, all linked to students.
-5. **Dashboard** → today's numbers at a glance. Top-right toggle switches Senior / Junior / Both.
-6. Share the link + password with your staff. Same live data for everyone.
+- **Attendance** — 3 sessions (Morning / Evening / Night), per wing. Statuses: Present, Absent,
+  Leave, Outpass, Sick. Students on leave or an open outpass are pre-marked automatically.
+  Save → WhatsApp message ready for that wing's group.
+- **Daily report** — Dashboard → pick date → Generate → send to the Principal's WhatsApp.
+  (A web page can't auto-send at 10 PM by itself; this is one tap instead.)
+- **Rooms** — tap G1–G14 / F1–F14 buttons, or type any custom room. Warns on double-booked
+  bed/almirah in the same wing + room.
+- **Leave** — from/to dates, parent consent, reason. Feeds attendance + daily report automatically.
+- **Outpass** — numbered passes, time out/expected return, guardian details, "Mark returned".
+- **Discipline & defaulters** — categories (uniform, cleanliness, late, mobile…), penalty points,
+  action taken, open/resolved.
+- **Fines** — typed amount each time, paid/unpaid, unpaid total shown.
+- **Complaints** — student or parent, category, ticket number, Pending → In Progress → Resolved.
+- **Parent calls** — log date + start/end (minutes auto-calculated, flags under 10 min);
+  "Calls due this week" lists every student with no call in the last 7 days.
 
-### Changing the password later
-Settings tab → **Change password** → everyone logs in again with the new one.
-(Or change it in Supabase → Authentication → Users.)
+## Passwords
 
----
+- **Principal password**: change inside the app (Settings) or in Supabase.
+- **Warden password**: change in Supabase → Authentication → Users → `staff@hostel.app` →
+  ⋮ → Reset/Update password. Wardens cannot change any password from the app.
 
 ## Honest notes
-- **Security:** The data is locked behind the staff login (Supabase Row Level Security). Anyone
-  *without* the password cannot read or change anything, even if they find the link. The one
-  caveat of a shared password is the obvious one — anyone you give it to has full access, so only
-  share it with trusted staff, and change it when someone leaves.
-- **WhatsApp:** Phones don't allow auto-sending or auto-picking a group from a web page. The app
-  gets the message fully written for you; you tap the correct wing group and press Send. One tap.
-- **Free limits:** Supabase's free tier is far more than a hostel needs. It pauses a project only
-  after a long stretch of zero activity; daily use keeps it awake.
-- **Backups:** Your data lives in Supabase. You can export any table to CSV from the Supabase
-  Table Editor anytime if you want an offline copy.
+
+- Warden restrictions are enforced by database security rules (Row Level Security) — even a
+  technical person with the warden password cannot pull addresses/phone numbers or edit history.
+- WhatsApp cannot be auto-sent or auto-targeted to a group from a web page; the app pre-writes
+  the message, you pick the group and tap Send.
+- Not included (would need a paid backend / native app): parent & student self-service logins,
+  automatic SMS alerts, scheduled 10 PM auto-reports, QR-code passes, photo/document storage,
+  mess/inventory/visitor/fees modules. All are possible later — this covers the daily-operations core.
+- Backups: Supabase → Table Editor → export any table to CSV.

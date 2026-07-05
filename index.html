@@ -1,604 +1,842 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Hostel Register</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Baluni Hostel Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f4f1ea; --panel:#fffdf8; --ink:#2b2622; --muted:#7a7066;
-    --line:#e3dccf; --accent:#7a4f2b; --accent2:#a9763f;
-    --green:#1f8a4c; --red:#c2362f; --gold:#b8860b; --blue:#2b6cb0;
-    --shadow:0 1px 0 #fff inset, 0 2px 8px rgba(80,60,30,.08);
-    --radius:12px;
+    --bg:#f9fafb; --surface:#ffffff; --border:#e5e7eb; --border2:#f3f4f6;
+    --ink:#111827; --muted:#6b7280; --faint:#9ca3af;
+    --accent:#4f46e5; --accent-soft:#eef2ff; --accent-ink:#3730a3;
+    --green:#059669; --green-soft:#ecfdf5;
+    --red:#dc2626;   --red-soft:#fef2f2;
+    --amber:#d97706; --amber-soft:#fffbeb;
+    --blue:#2563eb;  --blue-soft:#eff6ff;
+    --violet:#7c3aed;--violet-soft:#f5f3ff;
+    --radius:10px; --shadow:0 1px 2px rgba(16,24,40,.05);
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-    background:var(--bg); color:var(--ink); font-size:15px; line-height:1.45;
-    -webkit-text-size-adjust:100%;
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5;-webkit-text-size-adjust:100%}
+  .screen{display:none}.screen.active{display:block}
+  button{font-family:inherit}
+
+  /* ---------- login ---------- */
+  .center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+  .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);
+    padding:32px;width:100%;max-width:400px}
+  .logo-mark{width:40px;height:40px;border-radius:10px;background:var(--accent);color:#fff;display:flex;
+    align-items:center;justify-content:center;font-weight:800;font-size:18px;margin-bottom:14px}
+  .auth-card h1{font-size:19px;font-weight:700;margin:0 0 2px}
+  .auth-card .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+  .role-seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .role-seg button{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:12px;
+    cursor:pointer;text-align:left;transition:.12s}
+  .role-seg button .rt{font-weight:600;font-size:13.5px}
+  .role-seg button .rd{color:var(--muted);font-size:11.5px;margin-top:1px}
+  .role-seg button.on{border-color:var(--accent);background:var(--accent-soft)}
+  .role-seg button.on .rt{color:var(--accent-ink)}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:12px 0 5px}
+  input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;
+    background:var(--surface);color:var(--ink);font-size:14px;font-family:inherit;outline:none;transition:.12s}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  textarea{min-height:60px;resize:vertical}
+  .btn{appearance:none;border:none;border-radius:8px;padding:9px 16px;font-size:13.5px;font-weight:600;
+    cursor:pointer;background:var(--accent);color:#fff;transition:.12s}
+  .btn:hover{filter:brightness(1.06)}.btn:active{transform:translateY(1px)}
+  .btn.full{width:100%}
+  .btn.sec{background:var(--surface);color:var(--ink);border:1px solid var(--border)}
+  .btn.sec:hover{background:var(--border2)}
+  .btn.sm{padding:5px 10px;font-size:12px;border-radius:7px}
+  .err{color:var(--red);font-size:12.5px;margin-top:8px;min-height:16px}
+  .note{color:var(--muted);font-size:12px}
+
+  /* ---------- shell ---------- */
+  #app{display:none}
+  #app.active{display:flex;min-height:100vh}
+  aside.side{width:216px;flex:0 0 216px;background:var(--surface);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .side .brand{display:flex;align-items:center;gap:9px;padding:16px 14px 12px}
+  .side .brand .logo-mark{width:30px;height:30px;font-size:14px;border-radius:8px;margin:0}
+  .side .brand .bt{font-weight:700;font-size:13.5px;line-height:1.2}
+  .side .brand .bs{font-size:10.5px;color:var(--muted)}
+  .navgrp{padding:6px 8px}
+  .navlbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);
+    padding:10px 8px 4px}
+  .nav-item{display:flex;align-items:center;gap:9px;width:100%;border:none;background:transparent;
+    padding:7px 9px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;text-align:left}
+  .nav-item svg{width:15px;height:15px;flex:0 0 15px;stroke:currentColor;fill:none;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round}
+  .nav-item:hover{background:var(--border2);color:var(--ink)}
+  .nav-item.on{background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+  .side .foot{margin-top:auto;padding:12px;border-top:1px solid var(--border2)}
+  .userchip{display:flex;align-items:center;gap:8px}
+  .userchip .grow{flex:1;min-width:0}
+  .avatar{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex:0 0 28px}
+  .userchip .un{font-size:12.5px;font-weight:600}
+  .userchip .ur{font-size:11px;color:var(--muted)}
+
+  .main{flex:1;min-width:0}
+  .topbar{position:sticky;top:0;z-index:15;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);padding:12px 22px;display:flex;align-items:center;gap:12px}
+  .topbar h2{font-size:15.5px;font-weight:700;margin:0}
+  .topbar .spacer{flex:1}
+  .topbar select{width:auto;padding:6px 9px;font-size:12.5px;font-weight:600}
+  .content{padding:20px 22px 60px;max-width:1060px}
+
+  /* mobile */
+  .mobilebar{display:none}
+  @media(max-width:860px){
+    aside.side{display:none}
+    #app.active{display:block}
+    .mobilebar{display:block;position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border)}
+    .mobilebar .mtop{display:flex;align-items:center;gap:9px;padding:11px 14px 8px}
+    .mobilebar .mtop .spacer{flex:1}
+    .mobilebar .mtop select{width:auto;padding:5px 8px;font-size:12px}
+    .mobilebar nav{display:flex;gap:2px;overflow-x:auto;padding:0 8px 8px;-webkit-overflow-scrolling:touch}
+    .mobilebar nav .nav-item{flex:0 0 auto;padding:6px 11px;font-size:12.5px}
+    .mobilebar nav .nav-item svg{display:none}
+    .topbar{display:none}
+    .content{padding:14px 14px 60px}
   }
-  .screen{display:none}
-  .screen.active{display:block}
-  .hidden{display:none !important}
 
-  /* ---------- login / config ---------- */
-  .center-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-        box-shadow:var(--shadow);padding:24px;width:100%;max-width:420px}
-  .brand{font-size:22px;font-weight:800;letter-spacing:.3px;color:var(--accent)}
-  .brand small{display:block;font-weight:500;color:var(--muted);font-size:13px;margin-top:4px}
-  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:600}
-  input,select,textarea{
-    width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;
-    background:#fff;color:var(--ink);font-size:15px;font-family:inherit
-  }
-  textarea{min-height:64px;resize:vertical}
-  .btn{appearance:none;border:none;border-radius:10px;padding:11px 16px;font-size:15px;
-       font-weight:700;cursor:pointer;background:var(--accent);color:#fff;width:100%}
-  .btn:active{transform:translateY(1px)}
-  .btn.sec{background:#efe7d8;color:var(--accent)}
-  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
-  .btn.sm{width:auto;padding:7px 12px;font-size:13px}
-  .btn.danger{background:var(--red)}
-  .err{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+  /* ---------- components ---------- */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+  .card h3{margin:0 0 12px;font-size:13.5px;font-weight:700}
+  .card h3 .cnt{color:var(--faint);font-weight:600;font-size:12px;margin-left:6px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media(max-width:560px){.grid3{grid-template-columns:1fr 1fr}}
+  .actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
 
-  /* ---------- app shell ---------- */
-  header.bar{position:sticky;top:0;z-index:20;background:var(--accent);color:#fff;
-    padding:10px 14px;display:flex;align-items:center;gap:10px;
-    padding-top:calc(10px + env(safe-area-inset-top))}
-  header.bar .title{font-weight:800;font-size:17px;white-space:nowrap}
-  header.bar .spacer{flex:1}
-  header.bar select{width:auto;background:#fff2;color:#fff;border:1px solid #ffffff55;
-    padding:7px 9px;font-size:13px;font-weight:700}
-  header.bar select option{color:#000}
-  nav.tabs{position:sticky;top:0;z-index:10;display:flex;gap:4px;overflow-x:auto;
-    background:var(--panel);border-bottom:1px solid var(--line);padding:6px 8px;
-    -webkit-overflow-scrolling:touch}
-  nav.tabs button{flex:0 0 auto;border:none;background:transparent;color:var(--muted);
-    font-weight:700;font-size:13.5px;padding:8px 12px;border-radius:8px;cursor:pointer;white-space:nowrap}
-  nav.tabs button.on{background:#efe7d8;color:var(--accent)}
-  main{padding:14px;max-width:760px;margin:0 auto}
-  section.tab{display:none}
-  section.tab.on{display:block}
+  .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px}
+  .stat .n{font-size:21px;font-weight:800;letter-spacing:-.02em}
+  .stat .l{font-size:11.5px;color:var(--muted);font-weight:500;margin-top:1px}
+  .stat.warn .n{color:var(--red)}
 
-  h2{font-size:18px;margin:4px 0 12px}
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-         box-shadow:var(--shadow);padding:14px;margin-bottom:14px}
-  .panel h3{margin:0 0 10px;font-size:15px;color:var(--accent)}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-  @media(max-width:520px){.row3{grid-template-columns:1fr 1fr}}
-  .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-  .actions .btn{width:auto;flex:1;min-width:120px}
+  .pill{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .pill.green{background:var(--green-soft);color:var(--green)}
+  .pill.red{background:var(--red-soft);color:var(--red)}
+  .pill.amber{background:var(--amber-soft);color:var(--amber)}
+  .pill.blue{background:var(--blue-soft);color:var(--blue)}
+  .pill.violet{background:var(--violet-soft);color:var(--violet)}
+  .pill.grey{background:var(--border2);color:var(--muted)}
 
   .list{display:flex;flex-direction:column;gap:8px}
-  .item{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-  .item .top{display:flex;align-items:center;gap:8px}
-  .item .name{font-weight:700}
-  .item .meta{color:var(--muted);font-size:12.5px;margin-top:2px}
-  .item .grow{flex:1}
-  .tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}
-  .tag.sen{background:#e7eef9;color:var(--blue)}
-  .tag.jun{background:#fdeede;color:var(--accent2)}
-  .tag.green{background:#e3f3e8;color:var(--green)}
-  .tag.red{background:#fbe7e6;color:var(--red)}
-  .tag.gold{background:#f6edd2;color:var(--gold)}
-  .tag.grey{background:#eee;color:#666}
-  .iconbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 9px;
-    font-size:12px;font-weight:700;cursor:pointer;color:var(--ink)}
+  .rowc{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:11px 13px}
+  .rowc .top{display:flex;align-items:flex-start;gap:9px}
+  .rowc .grow{flex:1;min-width:0}
+  .rowc .nm{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .rowc .meta{color:var(--muted);font-size:12px;margin-top:2px}
+  .rowc .acts{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .empty{color:var(--faint);text-align:center;padding:28px;font-size:13px}
 
-  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px}
-  .stat .n{font-size:24px;font-weight:800;color:var(--accent)}
-  .stat .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+  /* room picker */
+  .roomgrid{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+  .roomgrid button{border:1px solid var(--border);background:var(--surface);border-radius:7px;
+    min-width:38px;padding:5px 0;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted)}
+  .roomgrid button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .floorseg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:8px}
+  .floorseg button{border:none;background:var(--surface);padding:5px 14px;font-size:12px;font-weight:600;
+    cursor:pointer;color:var(--muted)}
+  .floorseg button.on{background:var(--accent-soft);color:var(--accent-ink)}
 
   /* attendance */
-  .att-row{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);
-    border-radius:10px;padding:8px 10px}
+  .att-row{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);
+    border-radius:9px;padding:8px 11px}
   .att-row .grow{flex:1;min-width:0}
-  .att-row .nm{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .att-row .rm{color:var(--muted);font-size:12px}
+  .att-row .nm{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .att-row .rm{color:var(--faint);font-size:11.5px}
   .seg{display:flex;gap:4px}
-  .seg button{border:1px solid var(--line);background:#fff;color:var(--muted);font-weight:800;
-    width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:14px}
-  .seg button.P.on{background:var(--green);color:#fff;border-color:var(--green)}
-  .seg button.A.on{background:var(--red);color:#fff;border-color:var(--red)}
-  .seg button.L.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+  .seg button{border:1px solid var(--border);background:var(--surface);color:var(--faint);font-weight:700;
+    width:32px;height:32px;border-radius:7px;cursor:pointer;font-size:12px}
+  .seg button.P.on{background:var(--green);border-color:var(--green);color:#fff}
+  .seg button.A.on{background:var(--red);border-color:var(--red);color:#fff}
+  .seg button.L.on{background:var(--amber);border-color:var(--amber);color:#fff}
+  .seg button.O.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .seg button.S.on{background:var(--violet);border-color:var(--violet);color:#fff}
 
-  .msgbox{white-space:pre-wrap;background:#fff;border:1px dashed var(--accent2);border-radius:10px;
-    padding:12px;font-size:13.5px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.5}
+  .msgbox{white-space:pre-wrap;background:var(--bg);border:1px solid var(--border);border-radius:9px;
+    padding:13px;font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.55}
 
-  .empty{color:var(--muted);text-align:center;padding:24px;font-size:14px}
-  .muted{color:var(--muted);font-size:12.5px}
+  section.view{display:none}section.view.on{display:block}
+  .iconbtn{border:1px solid var(--border);background:var(--surface);border-radius:7px;padding:4px 10px;
+    font-size:12px;font-weight:600;cursor:pointer;color:var(--ink)}
+  .iconbtn:hover{background:var(--border2)}
+  .iconbtn.danger{color:var(--red)}
+  .searchbox{max-width:340px}
+  .adminonly{display:none !important}
+  body.is-admin .nav-item.adminonly{display:flex !important}
+  body.is-admin .navlbl.adminonly{display:block !important}
+  body.is-admin .acts.adminonly{display:flex !important}
+  body.is-admin .iconbtn.adminonly{display:inline-block !important}
+  body.is-admin section.view.adminonly.on{display:block !important}
 
-  /* toast */
-  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
-    background:#2b2622;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;
-    opacity:0;pointer-events:none;transition:.2s;z-index:100;max-width:90%}
+  #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:#111827;
+    color:#fff;padding:10px 16px;border-radius:9px;font-size:13px;opacity:0;pointer-events:none;transition:.2s;
+    z-index:100;max-width:90%;box-shadow:0 8px 24px rgba(0,0,0,.18)}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .spin{display:inline-block;width:16px;height:16px;border:2px solid #fff6;border-top-color:#fff;
-    border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid #fff6;border-top-color:#fff;border-radius:50%;
+    animation:sp .7s linear infinite;vertical-align:-2px}
   @keyframes sp{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 
-<!-- ================= CONFIG MISSING ================= -->
+<!-- ============ CONFIG MISSING ============ -->
 <div id="configScreen" class="screen">
-  <div class="center-wrap"><div class="card">
-    <div class="brand">Hostel Register <small>Setup needed</small></div>
-    <p style="font-size:14px;color:var(--muted)">
-      This file is not connected to your database yet. Open <b>index.html</b> in a text editor,
-      find the <code>CONFIG</code> block near the top of the script, and paste your Supabase
-      <b>Project URL</b> and <b>anon key</b>. See <b>SETUP.md</b> for step-by-step help.
-    </p>
+  <div class="center"><div class="auth-card">
+    <div class="logo-mark">B</div>
+    <h1>Setup needed</h1>
+    <p class="note">Open <b>index.html</b> in a text editor and paste your Supabase URL and anon key
+      into the CONFIG block near the top of the script. See <b>SETUP.md</b>.</p>
   </div></div>
 </div>
 
-<!-- ================= LOGIN ================= -->
+<!-- ============ LOGIN ============ -->
 <div id="loginScreen" class="screen">
-  <div class="center-wrap"><div class="card">
-    <div class="brand">Hostel Register <small>Senior &amp; Junior Wing</small></div>
+  <div class="center"><div class="auth-card">
+    <div class="logo-mark">B</div>
+    <h1>Baluni Hostel Management</h1>
+    <div class="sub">Baluni School of Competition · Farah, Mathura</div>
+    <div class="role-seg" id="roleSeg">
+      <button type="button" data-role="warden" class="on"><div class="rt">Warden / Staff</div><div class="rd">Daily entry work</div></button>
+      <button type="button" data-role="admin"><div class="rt">Principal</div><div class="rd">Full control</div></button>
+    </div>
     <form id="loginForm">
       <label>Password</label>
-      <input id="loginPass" type="password" autocomplete="current-password" placeholder="Enter staff password" required />
-      <div style="height:12px"></div>
-      <button class="btn" type="submit" id="loginBtn">Open</button>
+      <input id="loginPass" type="password" autocomplete="current-password" placeholder="Enter password" required/>
+      <div style="height:14px"></div>
+      <button class="btn full" type="submit" id="loginBtn">Sign in</button>
       <div class="err" id="loginErr"></div>
     </form>
-    <p class="muted" style="margin-top:14px">Use the password your warden gave you. Same data on every device.</p>
   </div></div>
 </div>
 
-<!-- ================= APP ================= -->
+<!-- ============ APP ============ -->
 <div id="app" class="screen">
-  <header class="bar">
-    <div class="title">🏨 Hostel Register</div>
-    <div class="spacer"></div>
-    <select id="wingFilter" title="Wing filter">
-      <option value="all">Both wings</option>
-      <option value="Senior">Senior</option>
-      <option value="Junior">Junior</option>
-    </select>
-  </header>
+  <aside class="side">
+    <div class="brand"><div class="logo-mark">B</div>
+      <div><div class="bt">Baluni Hostel</div><div class="bs">School of Competition</div></div></div>
+    <div class="navgrp">
+      <div class="navlbl">Overview</div>
+      <button class="nav-item on" data-view="dashboard"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</button>
+      <button class="nav-item adminonly" data-view="students"><svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><path d="M19 8v6M22 11h-6"/></svg>Students</button>
+      <div class="navlbl">Daily work</div>
+      <button class="nav-item" data-view="attendance"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Attendance</button>
+      <button class="nav-item" data-view="leave"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Leave</button>
+      <button class="nav-item" data-view="outpass"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5M15 12H3"/></svg>Outpass</button>
+      <button class="nav-item" data-view="medical"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Medical</button>
+      <div class="navlbl">Records</div>
+      <button class="nav-item" data-view="discipline"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Discipline</button>
+      <button class="nav-item" data-view="fines"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9h6M9 13h6M12 7v10"/></svg>Fines</button>
+      <button class="nav-item" data-view="complaints"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Complaints</button>
+      <button class="nav-item" data-view="calls"><svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3A19.5 19.5 0 0 1 5.2 13 19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>Parent calls</button>
+      <div class="navlbl adminonly">Admin</div>
+      <button class="nav-item adminonly" data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>Settings</button>
+    </div>
+    <div class="foot">
+      <div class="userchip"><div class="avatar" id="avInit">W</div>
+        <div class="grow"><div class="un" id="whoName">Warden</div><div class="ur" id="whoRole">Entry access</div></div>
+        <button class="iconbtn" id="logoutBtn" title="Log out">Exit</button></div>
+    </div>
+  </aside>
 
-  <nav class="tabs" id="tabs">
-    <button data-tab="dashboard" class="on">Dashboard</button>
-    <button data-tab="students">Students</button>
-    <button data-tab="attendance">Attendance</button>
-    <button data-tab="fines">Fines</button>
-    <button data-tab="medical">Medical</button>
-    <button data-tab="leave">Leave</button>
-    <button data-tab="defaulters">Defaulters</button>
-    <button data-tab="settings">Settings</button>
-  </nav>
+  <div class="main">
+    <div class="mobilebar">
+      <div class="mtop">
+        <div class="logo-mark" style="width:26px;height:26px;font-size:12px;border-radius:7px;margin:0">B</div>
+        <div style="font-weight:700;font-size:13.5px">Baluni Hostel</div>
+        <div class="spacer"></div>
+        <select id="wingFilterM"><option value="all">Both wings</option><option>Senior</option><option>Junior</option></select>
+        <button class="iconbtn" id="logoutBtnM">Exit</button>
+      </div>
+      <nav id="mnav"></nav>
+    </div>
+    <div class="topbar">
+      <h2 id="viewTitle">Dashboard</h2>
+      <div class="spacer"></div>
+      <select id="wingFilter"><option value="all">Both wings</option><option>Senior</option><option>Junior</option></select>
+    </div>
+    <div class="content">
 
-  <main>
-    <!-- DASHBOARD -->
-    <section class="tab on" id="tab-dashboard">
-      <h2>Today at a glance</h2>
-      <div id="dashBody"><div class="empty">Loading…</div></div>
-    </section>
+      <!-- DASHBOARD -->
+      <section class="view on" id="view-dashboard">
+        <div id="dashBody"><div class="empty">Loading…</div></div>
+        <div class="card">
+          <h3>Daily report for the Principal</h3>
+          <div class="grid3">
+            <div><label>Date</label><input id="rp_date" type="date"/></div>
+            <div style="align-self:end"><button class="btn sec" type="button" id="rpGen" style="width:100%">Generate report</button></div>
+          </div>
+          <div id="rpOut" style="display:none;margin-top:12px">
+            <div class="msgbox" id="rpMsg"></div>
+            <div class="actions">
+              <button class="btn sec" type="button" id="rpCopy">Copy</button>
+              <button class="btn" type="button" id="rpShare">Open WhatsApp</button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    <!-- STUDENTS -->
-    <section class="tab" id="tab-students">
-      <h2>Students</h2>
-      <div class="panel">
-        <h3 id="stFormTitle">Add new student</h3>
-        <form id="stForm">
-          <input type="hidden" id="st_id" />
-          <div class="row2">
-            <div><label>Wing *</label>
-              <select id="st_wing" required>
-                <option value="Senior">Senior</option>
-                <option value="Junior">Junior</option>
-              </select></div>
-            <div><label>Name *</label><input id="st_name" required /></div>
+      <!-- STUDENTS (principal only) -->
+      <section class="view adminonly" id="view-students">
+        <div class="card">
+          <h3 id="stFormTitle">Add new student</h3>
+          <form id="stForm">
+            <input type="hidden" id="st_id"/>
+            <div class="grid3">
+              <div><label>Wing *</label><select id="st_wing"><option>Senior</option><option>Junior</option></select></div>
+              <div><label>Name *</label><input id="st_name" required/></div>
+              <div><label>Class</label><input id="st_class"/></div>
+            </div>
+            <div class="grid3">
+              <div><label>Admission No</label><input id="st_admno"/></div>
+              <div><label>Roll No</label><input id="st_roll"/></div>
+              <div><label>Date of birth</label><input id="st_dob" type="date"/></div>
+            </div>
+            <div class="grid2">
+              <div><label>Father's name</label><input id="st_fname"/></div>
+              <div><label>Father's mobile</label><input id="st_fphone" inputmode="tel"/></div>
+              <div><label>Mother's name</label><input id="st_mname"/></div>
+              <div><label>Mother's mobile</label><input id="st_mphone" inputmode="tel"/></div>
+              <div><label>Guardian (local)</label><input id="st_gname"/></div>
+              <div><label>Guardian mobile</label><input id="st_gphone" inputmode="tel"/></div>
+            </div>
+            <label>Address</label><textarea id="st_addr"></textarea>
+            <div class="grid2">
+              <div><label>Blood group</label><input id="st_blood" placeholder="O+"/></div>
+              <div><label>Known medical condition</label><input id="st_med" placeholder="None / Asthma / …"/></div>
+            </div>
+            <label>Room — tap a room or type your own</label>
+            <input id="st_room" placeholder="G1 … G14, F1 … F14, or any custom room"/>
+            <div class="floorseg" id="floorSeg">
+              <button type="button" data-fl="G" class="on">Ground (G)</button>
+              <button type="button" data-fl="F">First (F)</button>
+            </div>
+            <div class="roomgrid" id="roomGrid"></div>
+            <div class="grid3" style="margin-top:10px">
+              <div><label>Bed No</label><input id="st_bed"/></div>
+              <div><label>Almirah No</label><input id="st_almirah"/></div>
+              <div><label>Admission date</label><input id="st_adm" type="date"/></div>
+            </div>
+            <div class="actions">
+              <button class="btn" type="submit" id="stSave">Save student</button>
+              <button class="btn sec" type="button" id="stReset">Clear</button>
+            </div>
+            <div class="err" id="stErr"></div>
+          </form>
+        </div>
+        <div class="card">
+          <h3>All students <span class="cnt" id="stCount"></span></h3>
+          <input id="stSearch" class="searchbox" placeholder="Search name, class, room, bed…"/>
+          <div style="height:10px"></div>
+          <div class="list" id="stList"></div>
+        </div>
+      </section>
+
+      <!-- ATTENDANCE -->
+      <section class="view" id="view-attendance">
+        <div class="card">
+          <h3>Mark attendance</h3>
+          <div class="grid3">
+            <div><label>Date</label><input id="at_date" type="date"/></div>
+            <div><label>Session</label><select id="at_session"><option>Morning</option><option>Evening</option><option>Night</option></select></div>
+            <div><label>Wing</label><select id="at_wing"><option>Senior</option><option>Junior</option></select></div>
           </div>
-          <div class="row3">
-            <div><label>Class</label><input id="st_class" /></div>
-            <div><label>Roll No</label><input id="st_roll" /></div>
-            <div><label>Blood group</label><input id="st_blood" placeholder="O+" /></div>
-          </div>
-          <div class="row2">
-            <div><label>Guardian name</label><input id="st_gname" /></div>
-            <div><label>Guardian phone</label><input id="st_gphone" inputmode="tel" /></div>
-          </div>
-          <label>Address</label><textarea id="st_addr"></textarea>
-          <label>Known medical condition</label><input id="st_med" placeholder="None / Asthma / ..." />
-          <div class="row3">
-            <div><label>Room</label>
-              <input id="st_room" list="roomList" placeholder="G1" />
-              <datalist id="roomList">
-                <option value="G1"></option><option value="G2"></option>
-                <option value="F1"></option><option value="F2"></option>
-              </datalist></div>
-            <div><label>Bed No</label><input id="st_bed" /></div>
-            <div><label>Almirah No</label><input id="st_almirah" /></div>
-          </div>
-          <label>Admission date</label><input id="st_adm" type="date" />
           <div class="actions">
-            <button class="btn" type="submit" id="stSave">Save student</button>
-            <button class="btn ghost" type="button" id="stReset">Clear</button>
+            <button class="btn sec" type="button" id="atLoad">Load list</button>
+            <button class="btn sec" type="button" id="atAllPresent">Mark all present</button>
           </div>
-          <div class="err" id="stErr"></div>
-        </form>
-      </div>
-      <div class="panel">
-        <input id="stSearch" placeholder="Search name, class, room, bed…" />
-        <div style="height:10px"></div>
-        <div class="list" id="stList"></div>
-      </div>
-    </section>
-
-    <!-- ATTENDANCE -->
-    <section class="tab" id="tab-attendance">
-      <h2>Attendance</h2>
-      <div class="panel">
-        <div class="row3">
-          <div><label>Date</label><input id="at_date" type="date" /></div>
-          <div><label>Session</label>
-            <select id="at_session"><option>Morning</option><option>Night</option></select></div>
-          <div><label>Wing</label>
-            <select id="at_wing"><option>Senior</option><option>Junior</option></select></div>
+          <p class="note" style="margin:10px 0 0">P Present · A Absent · L Leave · O Outpass · S Sick.
+            Students on leave or an open outpass are pre-marked automatically.</p>
         </div>
-        <div class="actions">
-          <button class="btn sec" type="button" id="atLoad">Load list</button>
-          <button class="btn ghost" type="button" id="atAllPresent">Mark all present</button>
+        <div class="card" id="atListPanel" style="display:none">
+          <div class="list" id="atList"></div>
+          <div class="actions"><button class="btn" type="button" id="atSave">Save attendance</button></div>
+          <div class="err" id="atErr"></div>
         </div>
-      </div>
-      <div class="panel" id="atListPanel" style="display:none">
-        <div class="list" id="atList"></div>
-        <div class="actions">
-          <button class="btn" type="button" id="atSave">Save attendance</button>
+        <div class="card" id="atMsgPanel" style="display:none">
+          <h3>WhatsApp message — paste into the wing's group</h3>
+          <div class="msgbox" id="atMsg"></div>
+          <div class="actions">
+            <button class="btn sec" type="button" id="atCopy">Copy message</button>
+            <button class="btn" type="button" id="atShare">Open WhatsApp</button>
+          </div>
+          <p class="note">WhatsApp opens with the text ready — pick the correct wing group, then Send.</p>
         </div>
-        <div class="err" id="atErr"></div>
-      </div>
-      <div class="panel" id="atMsgPanel" style="display:none">
-        <h3>WhatsApp message — paste into the wing's group</h3>
-        <div class="msgbox" id="atMsg"></div>
-        <div class="actions">
-          <button class="btn sec" type="button" id="atCopy">Copy message</button>
-          <button class="btn" type="button" id="atShare">Open WhatsApp</button>
+      </section>
+
+      <!-- LEAVE -->
+      <section class="view" id="view-leave">
+        <div class="card">
+          <h3>New leave entry</h3>
+          <form id="lvForm">
+            <label>Student</label><select id="lv_student" class="studentSel"></select>
+            <div class="grid2">
+              <div><label>From</label><input id="lv_from" type="date" required/></div>
+              <div><label>To</label><input id="lv_to" type="date" required/></div>
+            </div>
+            <div class="grid2">
+              <div><label>Reason</label><input id="lv_reason"/></div>
+              <div><label>Going to</label><input id="lv_dest"/></div>
+            </div>
+            <div class="grid2">
+              <div><label>Parent consent taken?</label><select id="lv_consent"><option value="true">Yes</option><option value="false">No</option></select></div>
+              <div><label>Entered / approved by</label><input id="lv_by"/></div>
+            </div>
+            <div class="actions"><button class="btn" type="submit">Add leave</button></div>
+            <div class="err" id="lvErr"></div>
+          </form>
         </div>
-        <p class="muted">WhatsApp can't auto-pick the group, so it opens with the text ready — tap the correct wing group, then Send.</p>
-      </div>
-    </section>
+        <div class="card"><h3>Leave records</h3><div class="list" id="lvList"></div></div>
+      </section>
 
-    <!-- FINES -->
-    <section class="tab" id="tab-fines">
-      <h2>Fines</h2>
-      <div class="panel">
-        <h3>Add fine</h3>
-        <form id="fnForm">
-          <label>Student</label><select id="fn_student" class="studentSel"></select>
-          <div class="row2">
-            <div><label>Amount (₹)</label><input id="fn_amount" type="number" min="0" step="1" required /></div>
-            <div><label>Paid?</label><select id="fn_paid"><option value="false">Unpaid</option><option value="true">Paid</option></select></div>
-          </div>
-          <label>Reason</label><input id="fn_reason" placeholder="Damage / Late / Rule break…" />
-          <label>Collected by</label><input id="fn_by" />
-          <div class="actions"><button class="btn" type="submit">Add fine</button></div>
-          <div class="err" id="fnErr"></div>
-        </form>
-      </div>
-      <div class="panel">
-        <h3>Records <span id="fnTotal" class="muted"></span></h3>
-        <div class="list" id="fnList"></div>
-      </div>
-    </section>
+      <!-- OUTPASS -->
+      <section class="view" id="view-outpass">
+        <div class="card">
+          <h3>Issue outpass</h3>
+          <form id="opForm">
+            <label>Student</label><select id="op_student" class="studentSel"></select>
+            <div class="grid3">
+              <div><label>Date</label><input id="op_date" type="date"/></div>
+              <div><label>Time out</label><input id="op_out" type="time"/></div>
+              <div><label>Expected return</label><input id="op_ret" type="time"/></div>
+            </div>
+            <div class="grid2">
+              <div><label>Destination</label><input id="op_dest"/></div>
+              <div><label>Issued by</label><input id="op_by"/></div>
+              <div><label>Taken by (guardian)</label><input id="op_gname"/></div>
+              <div><label>Guardian mobile</label><input id="op_gphone" inputmode="tel"/></div>
+            </div>
+            <div class="actions"><button class="btn" type="submit">Issue pass</button></div>
+            <div class="err" id="opErr"></div>
+          </form>
+        </div>
+        <div class="card"><h3>Outpass register <span class="cnt" id="opOpen"></span></h3><div class="list" id="opList"></div></div>
+      </section>
 
-    <!-- MEDICAL -->
-    <section class="tab" id="tab-medical">
-      <h2>Medical</h2>
-      <div class="panel">
-        <h3>Add medical record</h3>
-        <form id="mdForm">
-          <label>Student</label><select id="md_student" class="studentSel"></select>
-          <div class="row2">
-            <div><label>Condition</label><input id="md_cond" /></div>
-            <div><label>Severity</label><select id="md_sev"><option>Low</option><option>Medium</option><option>High</option></select></div>
-          </div>
-          <label>Treatment given</label><textarea id="md_treat"></textarea>
-          <div class="actions"><button class="btn" type="submit">Add record</button></div>
-          <div class="err" id="mdErr"></div>
-        </form>
-      </div>
-      <div class="panel"><h3>Records</h3><div class="list" id="mdList"></div></div>
-    </section>
+      <!-- MEDICAL -->
+      <section class="view" id="view-medical">
+        <div class="card">
+          <h3>New medical entry</h3>
+          <form id="mdForm">
+            <label>Student</label><select id="md_student" class="studentSel"></select>
+            <div class="grid2">
+              <div><label>Condition / symptoms</label><input id="md_cond"/></div>
+              <div><label>Severity</label><select id="md_sev"><option>Low</option><option>Medium</option><option>High</option></select></div>
+            </div>
+            <label>Treatment given / doctor</label><textarea id="md_treat"></textarea>
+            <div class="actions"><button class="btn" type="submit">Add record</button></div>
+            <div class="err" id="mdErr"></div>
+          </form>
+        </div>
+        <div class="card"><h3>Medical records</h3><div class="list" id="mdList"></div></div>
+      </section>
 
-    <!-- LEAVE -->
-    <section class="tab" id="tab-leave">
-      <h2>Leave</h2>
-      <div class="panel">
-        <h3>Add leave</h3>
-        <form id="lvForm">
-          <label>Student</label><select id="lv_student" class="studentSel"></select>
-          <div class="row2">
-            <div><label>From</label><input id="lv_from" type="date" required /></div>
-            <div><label>To</label><input id="lv_to" type="date" required /></div>
-          </div>
-          <div class="row2">
-            <div><label>Reason</label><input id="lv_reason" /></div>
-            <div><label>Going to</label><input id="lv_dest" /></div>
-          </div>
-          <label>Approved by</label><input id="lv_by" />
-          <div class="actions"><button class="btn" type="submit">Add leave</button></div>
-          <div class="err" id="lvErr"></div>
-        </form>
-      </div>
-      <div class="panel"><h3>Records</h3><div class="list" id="lvList"></div></div>
-    </section>
+      <!-- DISCIPLINE -->
+      <section class="view" id="view-discipline">
+        <div class="card">
+          <h3>New discipline / defaulter entry</h3>
+          <form id="dcForm">
+            <label>Student</label><select id="dc_student" class="studentSel"></select>
+            <div class="grid2">
+              <div><label>Category</label>
+                <select id="dc_cat">
+                  <option>Uniform issue</option><option>Cleanliness — room/bed</option>
+                  <option>Cleanliness — cupboard</option><option>Late reporting</option>
+                  <option>Mobile misuse</option><option>Homework not done</option>
+                  <option>Lights not off</option><option>Late night movement</option>
+                  <option>Fighting / bullying</option><option>Misbehaviour</option><option>Other</option>
+                </select></div>
+              <div><label>Penalty points</label><input id="dc_points" type="number" min="1" value="1"/></div>
+            </div>
+            <label>Details</label><input id="dc_details"/>
+            <div class="grid2">
+              <div><label>Action taken</label><input id="dc_action"/></div>
+              <div><label>Reported by</label><input id="dc_by"/></div>
+            </div>
+            <div class="actions"><button class="btn" type="submit">Add entry</button></div>
+            <div class="err" id="dcErr"></div>
+          </form>
+        </div>
+        <div class="card"><h3>Discipline register <span class="cnt" id="dcOpen"></span></h3><div class="list" id="dcList"></div></div>
+      </section>
 
-    <!-- DEFAULTERS -->
-    <section class="tab" id="tab-defaulters">
-      <h2>Defaulters</h2>
-      <div class="panel">
-        <h3>Add defaulter</h3>
-        <form id="dfForm">
-          <label>Student</label><select id="df_student" class="studentSel"></select>
-          <label>Violation</label><input id="df_violation" placeholder="Absent without leave / fight / …" />
-          <label>Action taken</label><input id="df_action" />
-          <div class="actions"><button class="btn" type="submit">Add</button></div>
-          <div class="err" id="dfErr"></div>
-        </form>
-      </div>
-      <div class="panel"><h3>Records</h3><div class="list" id="dfList"></div></div>
-    </section>
+      <!-- FINES -->
+      <section class="view" id="view-fines">
+        <div class="card">
+          <h3>New fine</h3>
+          <form id="fnForm">
+            <label>Student</label><select id="fn_student" class="studentSel"></select>
+            <div class="grid3">
+              <div><label>Amount (₹)</label><input id="fn_amount" type="number" min="0" step="1" required/></div>
+              <div><label>Status</label><select id="fn_paid"><option value="false">Unpaid</option><option value="true">Paid</option></select></div>
+              <div><label>Collected by</label><input id="fn_by"/></div>
+            </div>
+            <label>Reason</label><input id="fn_reason" placeholder="Damage / late / rule break…"/>
+            <div class="actions"><button class="btn" type="submit">Add fine</button></div>
+            <div class="err" id="fnErr"></div>
+          </form>
+        </div>
+        <div class="card"><h3>Fine register <span class="cnt" id="fnTotal"></span></h3><div class="list" id="fnList"></div></div>
+      </section>
 
-    <!-- SETTINGS -->
-    <section class="tab" id="tab-settings">
-      <h2>Settings</h2>
-      <div class="panel">
-        <h3>Change shared password</h3>
-        <form id="pwForm">
-          <label>New password</label><input id="pw_new" type="password" minlength="6" required />
-          <label>Confirm new password</label><input id="pw_conf" type="password" minlength="6" required />
-          <div class="actions"><button class="btn" type="submit">Update password</button></div>
-          <div class="err" id="pwErr"></div>
-          <p class="muted">Everyone shares one password. After you change it, tell the staff the new one and ask them to log in again.</p>
-        </form>
-      </div>
-      <div class="panel">
-        <h3>Session</h3>
-        <button class="btn danger" type="button" id="logoutBtn">Log out</button>
-      </div>
-    </section>
-  </main>
+      <!-- COMPLAINTS -->
+      <section class="view" id="view-complaints">
+        <div class="card">
+          <h3>New complaint</h3>
+          <form id="cpForm">
+            <div class="grid2">
+              <div><label>From</label><select id="cp_source"><option>Student</option><option>Parent</option></select></div>
+              <div><label>Category</label>
+                <select id="cp_cat"><option>Food</option><option>Room</option><option>Water</option>
+                <option>Electricity</option><option>Health</option><option>Academic</option>
+                <option>Discipline</option><option>Other</option></select></div>
+            </div>
+            <label>Student (related to)</label><select id="cp_student" class="studentSel"></select>
+            <label>Complaint details</label><textarea id="cp_details"></textarea>
+            <div class="actions"><button class="btn" type="submit">Register complaint</button></div>
+            <div class="err" id="cpErr"></div>
+          </form>
+        </div>
+        <div class="card"><h3>Complaint register <span class="cnt" id="cpOpen"></span></h3><div class="list" id="cpList"></div></div>
+      </section>
+
+      <!-- PARENT CALLS -->
+      <section class="view" id="view-calls">
+        <div class="card">
+          <h3>Log a parent call</h3>
+          <p class="note" style="margin-top:-6px">Rule: every student talks to parents at least once a week, minimum 10 minutes.</p>
+          <form id="pcForm">
+            <label>Student</label><select id="pc_student" class="studentSel"></select>
+            <div class="grid3">
+              <div><label>Date</label><input id="pc_date" type="date"/></div>
+              <div><label>Start time</label><input id="pc_start" type="time"/></div>
+              <div><label>End time</label><input id="pc_end" type="time"/></div>
+            </div>
+            <div class="grid2">
+              <div><label>Parent spoken to</label><input id="pc_parent"/></div>
+              <div><label>Staff on duty</label><input id="pc_staff"/></div>
+            </div>
+            <label>Notes</label><input id="pc_notes"/>
+            <div class="actions"><button class="btn" type="submit">Log call</button></div>
+            <div class="err" id="pcErr"></div>
+          </form>
+        </div>
+        <div class="card"><h3>Calls due this week <span class="cnt" id="pcDueN"></span></h3><div class="list" id="pcDue"></div></div>
+        <div class="card"><h3>Recent calls</h3><div class="list" id="pcList"></div></div>
+      </section>
+
+      <!-- SETTINGS (principal only) -->
+      <section class="view adminonly" id="view-settings">
+        <div class="card">
+          <h3>Change Principal password</h3>
+          <form id="pwForm">
+            <div class="grid2">
+              <div><label>New password</label><input id="pw_new" type="password" minlength="6" required/></div>
+              <div><label>Confirm</label><input id="pw_conf" type="password" minlength="6" required/></div>
+            </div>
+            <div class="actions"><button class="btn" type="submit">Update password</button></div>
+            <div class="err" id="pwErr"></div>
+            <p class="note">This changes only the Principal password. The Warden password is changed from the
+              Supabase dashboard (Authentication → Users → staff@hostel.app → Reset password) — see SETUP.md.
+              Wardens have no password controls in the app.</p>
+          </form>
+        </div>
+      </section>
+
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ============================================================
-   CONFIG  —  paste your two Supabase values here (see SETUP.md)
-   ============================================================ */
+/* ================================================================
+   CONFIG
+   ================================================================ */
 const SUPABASE_URL      = "https://bycpckezurktamehbgje.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5Y3Bja2V6dXJrdGFtZWhiZ2plIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMjkwNTgsImV4cCI6MjA5NzYwNTA1OH0.M3h-mBeEVPJBB_kOH_GQf6Uj0D_7ljGSus0dvN4d7-c";
-const HOSTEL_EMAIL      = "staff@hostel.app";   // the shared login email (set in Supabase Auth)
-/* ============================================================ */
+const HOSTEL_EMAIL      = "staff@hostel.app";      // warden shared login
+const PRINCIPAL_EMAIL   = "principal@hostel.app";  // principal login
+/* ================================================================ */
 
-let sb = null;
-let STUDENTS = [];          // cached student list
-let attendanceState = [];   // [{id,name,room,wing,status}]
+let sb=null, ROLE="warden", STUDENTS=[];
+let attendanceState=[], attendanceCtx=null;
+let loginRole="warden";
 
-/* ---------- tiny helpers ---------- */
-const $  = (s)=>document.querySelector(s);
-const $$ = (s)=>Array.from(document.querySelectorAll(s));
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 function show(id){ $$(".screen").forEach(s=>s.classList.remove("active")); $("#"+id).classList.add("active"); }
-function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),2200); }
-function esc(s){ return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
-function todayStr(){ return new Date().toLocaleDateString("en-CA"); } // YYYY-MM-DD local
-function fmtDate(d){ if(!d) return ""; const p=String(d).slice(0,10).split("-"); return p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : d; }
-function wingTag(w){ return w==="Senior" ? '<span class="tag sen">Senior</span>' : w==="Junior" ? '<span class="tag jun">Junior</span>' : ""; }
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove("show"),2300); }
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function todayStr(){ return new Date().toLocaleDateString("en-CA"); }
+function fmtDate(d){ if(!d) return ""; const p=String(d).slice(0,10).split("-"); return p.length===3?`${p[2]}/${p[1]}/${p[0]}`:d; }
+function wingPill(w){ return w==="Senior"?'<span class="pill blue">Senior</span>':w==="Junior"?'<span class="pill violet">Junior</span>':""; }
+function isAdmin(){ return ROLE==="admin"; }
+function chkErr(err,el){ if(err){ if(el) el.innerHTML='<div class="empty">Could not load: '+esc(err.message)+'</div>'; else toast("Error: "+err.message); return true; } return false; }
 
 /* ---------- boot ---------- */
 window.addEventListener("DOMContentLoaded", init);
-
 async function init(){
-  if(!SUPABASE_URL || SUPABASE_URL.indexOf("PASTE_")===0 || !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.indexOf("PASTE_")===0){
-    show("configScreen"); return;
-  }
-  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const { data:{ session } } = await sb.auth.getSession();
-  if(session) enterApp(); else show("loginScreen");
+  if(!SUPABASE_URL||SUPABASE_URL.indexOf("PASTE_")===0||!SUPABASE_ANON_KEY||SUPABASE_ANON_KEY.indexOf("PASTE_")===0){ show("configScreen"); return; }
+  sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  buildRoomGrid("G");
+  const {data:{session}}=await sb.auth.getSession();
+  if(session){ ROLE=(session.user&&session.user.email===PRINCIPAL_EMAIL)?"admin":"warden"; enterApp(); }
+  else show("loginScreen");
 }
 
-/* ---------- auth ---------- */
-$("#loginForm").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  const btn=$("#loginBtn"), err=$("#loginErr");
-  err.textContent=""; btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
-  const { error } = await sb.auth.signInWithPassword({ email:HOSTEL_EMAIL, password:$("#loginPass").value });
-  btn.disabled=false; btn.textContent="Open";
-  if(error){ err.textContent = "Wrong password (or login not set up yet). "+error.message; return; }
-  $("#loginPass").value=""; enterApp();
+/* ---------- login ---------- */
+$("#roleSeg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  loginRole=b.dataset.role;
+  $$("#roleSeg button").forEach(x=>x.classList.toggle("on",x===b));
 });
-
-$("#logoutBtn").addEventListener("click", async ()=>{ await sb.auth.signOut(); location.reload(); });
+$("#loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const btn=$("#loginBtn"),err=$("#loginErr");
+  err.textContent=""; btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
+  const email=loginRole==="admin"?PRINCIPAL_EMAIL:HOSTEL_EMAIL;
+  const {error}=await sb.auth.signInWithPassword({email,password:$("#loginPass").value});
+  btn.disabled=false; btn.textContent="Sign in";
+  if(error){
+    const who=loginRole==="admin"?"Principal":"Warden";
+    if(error.status===400) err.textContent="Wrong password for "+who+".";
+    else err.textContent="Login problem for "+who+": "+error.message+" — if this says a database/schema error, run create_logins.sql in Supabase (it repairs the account).";
+    return;
+  }
+  ROLE=loginRole; $("#loginPass").value=""; enterApp();
+});
+async function doLogout(){ await sb.auth.signOut(); location.reload(); }
+$("#logoutBtn").addEventListener("click",doLogout);
+$("#logoutBtnM").addEventListener("click",doLogout);
 
 async function enterApp(){
+  document.body.classList.toggle("is-admin",isAdmin());
+  $("#whoName").textContent=isAdmin()?"Principal":"Warden";
+  $("#whoRole").textContent=isAdmin()?"Full control":"Entry access";
+  $("#avInit").textContent=isAdmin()?"P":"W";
   show("app");
+  buildMobileNav();
+  $("#at_date").value=todayStr(); $("#rp_date").value=todayStr();
+  $("#op_date").value=todayStr(); $("#pc_date").value=todayStr();
   await loadStudents();
-  setTab("dashboard");
-  $("#at_date").value = todayStr();
+  setView("dashboard");
 }
 
-/* ---------- tabs ---------- */
-$("#tabs").addEventListener("click",(e)=>{ const b=e.target.closest("button"); if(b) setTab(b.dataset.tab); });
-function setTab(name){
-  $$("#tabs button").forEach(b=>b.classList.toggle("on", b.dataset.tab===name));
-  $$("section.tab").forEach(s=>s.classList.toggle("on", s.id==="tab-"+name));
-  if(name==="dashboard") renderDashboard();
-  if(name==="students")  renderStudents();
-  if(name==="fines")     loadFines();
-  if(name==="medical")   loadMedical();
-  if(name==="leave")     loadLeave();
-  if(name==="defaulters")loadDefaulters();
+/* ---------- nav ---------- */
+function buildMobileNav(){
+  const src=$$("aside .nav-item");
+  $("#mnav").innerHTML=src.map(b=>`<button class="nav-item${b.classList.contains("adminonly")?" adminonly":""}" data-view="${b.dataset.view}">${esc(b.textContent)}</button>`).join("");
 }
-$("#wingFilter").addEventListener("change",()=>{
-  const cur = $$("#tabs button.on")[0]?.dataset.tab;
-  if(cur==="dashboard") renderDashboard();
-  if(cur==="students")  renderStudents();
+document.addEventListener("click",e=>{
+  const b=e.target.closest(".nav-item[data-view]"); if(!b) return;
+  setView(b.dataset.view);
 });
-function wingSel(){ return $("#wingFilter").value; } // 'all'|'Senior'|'Junior'
+function setView(name){
+  if(!isAdmin()&&(name==="students"||name==="settings")) name="dashboard";
+  $$(".nav-item").forEach(b=>b.classList.toggle("on",b.dataset.view===name));
+  $$("section.view").forEach(s=>s.classList.toggle("on",s.id==="view-"+name));
+  const titles={dashboard:"Dashboard",students:"Students",attendance:"Attendance",leave:"Leave",
+    outpass:"Outpass",medical:"Medical",discipline:"Discipline & Defaulters",fines:"Fines",
+    complaints:"Complaints",calls:"Parent call tracker",settings:"Settings"};
+  $("#viewTitle").textContent=titles[name]||name;
+  const load={dashboard:renderDashboard,students:renderStudents,leave:loadLeave,outpass:loadOutpass,
+    medical:loadMedical,discipline:loadDiscipline,fines:loadFines,complaints:loadComplaints,calls:loadCalls};
+  if(load[name]) load[name]();
+  window.scrollTo({top:0});
+}
+function wingSel(){ return (innerWidth<=860?$("#wingFilterM"):$("#wingFilter")).value; }
+$("#wingFilter").addEventListener("change",()=>{ $("#wingFilterM").value=$("#wingFilter").value; refreshCurrent(); });
+$("#wingFilterM").addEventListener("change",()=>{ $("#wingFilter").value=$("#wingFilterM").value; refreshCurrent(); });
+function refreshCurrent(){ const b=$$(".nav-item.on")[0]; if(b) setView(b.dataset.view); }
 
-/* ============================================================
-   STUDENTS
-   ============================================================ */
+/* ================================================================
+   STUDENTS — principal: full rows; warden: roster (name/wing/class/room/bed only)
+   ================================================================ */
 async function loadStudents(){
-  const { data, error } = await sb.from("students").select("*").order("name");
-  if(error){ toast("Load failed: "+error.message); return; }
-  STUDENTS = data||[];
+  let res;
+  if(isAdmin()) res=await sb.from("students").select("*").order("name");
+  else res=await sb.rpc("students_roster");
+  if(res.error){ toast("Students load failed: "+res.error.message); STUDENTS=[]; return; }
+  STUDENTS=res.data||[];
   fillStudentSelects();
 }
-
 function fillStudentSelects(){
-  const opts = '<option value="">— select student —</option>' +
-    STUDENTS.map(s=>`<option value="${s.id}">${esc(s.name)} · ${esc(s.wing)}${s.room?` · ${esc(s.room)}`:""}</option>`).join("");
+  const opts='<option value="">— select student —</option>'+
+    STUDENTS.map(s=>`<option value="${s.id}">${esc(s.name)} · ${esc(s.wing)}${s.room?" · "+esc(s.room):""}</option>`).join("");
   $$(".studentSel").forEach(sel=>{ const v=sel.value; sel.innerHTML=opts; sel.value=v; });
 }
 
+/* room picker */
+function buildRoomGrid(floor){
+  const g=$("#roomGrid");
+  g.innerHTML=Array.from({length:14},(_,i)=>`<button type="button" data-room="${floor}${i+1}">${floor}${i+1}</button>`).join("");
+  syncRoomGrid();
+}
+$("#floorSeg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  $$("#floorSeg button").forEach(x=>x.classList.toggle("on",x===b));
+  buildRoomGrid(b.dataset.fl);
+});
+$("#roomGrid").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  $("#st_room").value=b.dataset.room; syncRoomGrid();
+});
+$("#st_room").addEventListener("input",syncRoomGrid);
+function syncRoomGrid(){
+  const v=($("#st_room").value||"").trim().toUpperCase();
+  $$("#roomGrid button").forEach(b=>b.classList.toggle("on",b.dataset.room===v));
+}
+
 function renderStudents(){
-  const q = ($("#stSearch").value||"").toLowerCase();
-  const wf = wingSel();
-  const rows = STUDENTS.filter(s=>{
-    if(wf!=="all" && s.wing!==wf) return false;
+  if(!isAdmin()) return;
+  const q=($("#stSearch").value||"").toLowerCase(), wf=wingSel();
+  const rows=STUDENTS.filter(s=>{
+    if(wf!=="all"&&s.wing!==wf) return false;
     if(!q) return true;
-    return [s.name,s.class,s.room,s.bed_no,s.almirah_no,s.guardian_name].some(v=>(v||"").toLowerCase().includes(q));
+    return [s.name,s.class,s.room,s.bed_no,s.almirah_no,s.father_name,s.guardian_name].some(v=>(v||"").toLowerCase().includes(q));
   });
+  $("#stCount").textContent=rows.length+" shown";
   const el=$("#stList");
-  if(!rows.length){ el.innerHTML='<div class="empty">No students yet. Add one above.</div>'; return; }
-  el.innerHTML = rows.map(s=>`
-    <div class="item">
-      <div class="top">
-        <div class="grow">
-          <div class="name">${esc(s.name)} ${wingTag(s.wing)}</div>
-          <div class="meta">
-            ${s.class?`Class ${esc(s.class)} · `:""}${s.room?`Room ${esc(s.room)} · `:""}${s.bed_no?`Bed ${esc(s.bed_no)} · `:""}${s.almirah_no?`Almirah ${esc(s.almirah_no)}`:""}
-          </div>
-          <div class="meta">
-            ${s.guardian_name?`G: ${esc(s.guardian_name)} `:""}${s.guardian_phone?`(${esc(s.guardian_phone)}) `:""}${s.blood_group?`· ${esc(s.blood_group)} `:""}${s.medical_condition && s.medical_condition.toLowerCase()!=="none"?`· ⚕ ${esc(s.medical_condition)}`:""}
-          </div>
-        </div>
-      </div>
-      <div class="actions" style="margin-top:8px">
+  if(!rows.length){ el.innerHTML='<div class="empty">No students yet.</div>'; return; }
+  el.innerHTML=rows.map(s=>`
+    <div class="rowc"><div class="top">
+      <div class="avatar">${esc((s.name||"?").trim().slice(0,1).toUpperCase())}</div>
+      <div class="grow">
+        <div class="nm">${esc(s.name)} ${wingPill(s.wing)}${s.medical_condition&&s.medical_condition.toLowerCase()!=="none"?' <span class="pill red">Medical</span>':""}</div>
+        <div class="meta">${s.class?"Class "+esc(s.class)+" · ":""}${s.room?"Room "+esc(s.room)+" · ":""}${s.bed_no?"Bed "+esc(s.bed_no)+" · ":""}${s.almirah_no?"Almirah "+esc(s.almirah_no):""}</div>
+        <div class="meta">${s.father_name?"F: "+esc(s.father_name)+(s.father_phone?" ("+esc(s.father_phone)+")":"")+" · ":""}${s.mother_name?"M: "+esc(s.mother_name)+(s.mother_phone?" ("+esc(s.mother_phone)+")":""):""}</div>
+        ${s.address?'<div class="meta">'+esc(s.address)+'</div>':""}
+      </div></div>
+      <div class="acts">
         <button class="iconbtn" onclick="editStudent('${s.id}')">Edit</button>
-        <button class="iconbtn" onclick="deleteStudent('${s.id}')">Delete</button>
+        <button class="iconbtn danger" onclick="deleteStudent('${s.id}')">Delete</button>
       </div>
     </div>`).join("");
 }
-$("#stSearch").addEventListener("input", renderStudents);
+$("#stSearch").addEventListener("input",renderStudents);
 
 function studentForm(){
-  return {
-    wing:$("#st_wing").value, name:$("#st_name").value.trim(), class:$("#st_class").value.trim(),
-    roll_no:$("#st_roll").value.trim(), guardian_name:$("#st_gname").value.trim(),
-    guardian_phone:$("#st_gphone").value.trim(), address:$("#st_addr").value.trim(),
-    blood_group:$("#st_blood").value.trim(), medical_condition:$("#st_med").value.trim(),
-    room:$("#st_room").value.trim(), bed_no:$("#st_bed").value.trim(),
-    almirah_no:$("#st_almirah").value.trim(),
-    admission_date: $("#st_adm").value || null
-  };
+  return { wing:$("#st_wing").value, name:$("#st_name").value.trim(), class:$("#st_class").value.trim(),
+    admission_no:$("#st_admno").value.trim(), roll_no:$("#st_roll").value.trim(), dob:$("#st_dob").value||null,
+    father_name:$("#st_fname").value.trim(), father_phone:$("#st_fphone").value.trim(),
+    mother_name:$("#st_mname").value.trim(), mother_phone:$("#st_mphone").value.trim(),
+    guardian_name:$("#st_gname").value.trim(), guardian_phone:$("#st_gphone").value.trim(),
+    address:$("#st_addr").value.trim(), blood_group:$("#st_blood").value.trim(),
+    medical_condition:$("#st_med").value.trim(), room:$("#st_room").value.trim().toUpperCase(),
+    bed_no:$("#st_bed").value.trim(), almirah_no:$("#st_almirah").value.trim(),
+    admission_date:$("#st_adm").value||null };
 }
-
-function checkConflict(f, excludeId){
-  // double-booking guard within the same wing + room
+function checkConflict(f,excludeId){
   for(const s of STUDENTS){
-    if(excludeId && s.id===excludeId) continue;
-    if(s.wing!==f.wing || !f.room || s.room!==f.room) continue;
-    if(f.bed_no && s.bed_no===f.bed_no) return `Bed ${f.bed_no} in ${f.wing} room ${f.room} is already given to ${s.name}.`;
-    if(f.almirah_no && s.almirah_no===f.almirah_no) return `Almirah ${f.almirah_no} in ${f.wing} room ${f.room} is already given to ${s.name}.`;
+    if(excludeId&&s.id===excludeId) continue;
+    if(s.wing!==f.wing||!f.room||(s.room||"").toUpperCase()!==f.room) continue;
+    if(f.bed_no&&s.bed_no===f.bed_no) return `Bed ${f.bed_no} in ${f.wing} ${f.room} is already given to ${s.name}.`;
+    if(f.almirah_no&&s.almirah_no===f.almirah_no) return `Almirah ${f.almirah_no} in ${f.wing} ${f.room} is already given to ${s.name}.`;
   }
   return null;
 }
-
-$("#stForm").addEventListener("submit", async (e)=>{
+$("#stForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const err=$("#stErr"); err.textContent="";
-  const id=$("#st_id").value;
-  const f=studentForm();
+  const id=$("#st_id").value, f=studentForm();
   if(!f.name){ err.textContent="Name is required."; return; }
-  const conflict=checkConflict(f, id||null);
-  if(conflict && !confirm(conflict+"\n\nSave anyway?")) return;
+  const conflict=checkConflict(f,id||null);
+  if(conflict&&!confirm(conflict+"\n\nSave anyway?")) return;
   const btn=$("#stSave"); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
-  let res;
-  if(id) res=await sb.from("students").update(f).eq("id",id);
-  else   res=await sb.from("students").insert(f);
+  const res=id?await sb.from("students").update(f).eq("id",id):await sb.from("students").insert(f);
   btn.disabled=false; btn.textContent="Save student";
   if(res.error){ err.textContent=res.error.message; return; }
   toast(id?"Student updated":"Student added");
-  resetStudentForm();
-  await loadStudents(); renderStudents();
+  resetStudentForm(); await loadStudents(); renderStudents();
 });
-
-window.editStudent=(id)=>{
+window.editStudent=id=>{
   const s=STUDENTS.find(x=>x.id===id); if(!s) return;
   $("#st_id").value=s.id; $("#st_wing").value=s.wing||"Senior"; $("#st_name").value=s.name||"";
-  $("#st_class").value=s.class||""; $("#st_roll").value=s.roll_no||""; $("#st_blood").value=s.blood_group||"";
+  $("#st_class").value=s.class||""; $("#st_admno").value=s.admission_no||""; $("#st_roll").value=s.roll_no||"";
+  $("#st_dob").value=s.dob||""; $("#st_fname").value=s.father_name||""; $("#st_fphone").value=s.father_phone||"";
+  $("#st_mname").value=s.mother_name||""; $("#st_mphone").value=s.mother_phone||"";
   $("#st_gname").value=s.guardian_name||""; $("#st_gphone").value=s.guardian_phone||"";
-  $("#st_addr").value=s.address||""; $("#st_med").value=s.medical_condition||"";
+  $("#st_addr").value=s.address||""; $("#st_blood").value=s.blood_group||""; $("#st_med").value=s.medical_condition||"";
   $("#st_room").value=s.room||""; $("#st_bed").value=s.bed_no||""; $("#st_almirah").value=s.almirah_no||"";
   $("#st_adm").value=s.admission_date||"";
-  $("#stFormTitle").textContent="Edit student";
+  $("#stFormTitle").textContent="Edit student"; syncRoomGrid();
   window.scrollTo({top:0,behavior:"smooth"});
 };
-window.deleteStudent=async (id)=>{
+window.deleteStudent=async id=>{
   const s=STUDENTS.find(x=>x.id===id); if(!s) return;
-  if(!confirm(`Delete ${s.name}? This also removes their attendance history.`)) return;
-  const { error }=await sb.from("students").delete().eq("id",id);
+  if(!confirm(`Delete ${s.name}? Their attendance history is removed too.`)) return;
+  const {error}=await sb.from("students").delete().eq("id",id);
   if(error){ toast(error.message); return; }
   toast("Deleted"); await loadStudents(); renderStudents();
 };
-function resetStudentForm(){ $("#stForm").reset(); $("#st_id").value=""; $("#stFormTitle").textContent="Add new student"; }
-$("#stReset").addEventListener("click", resetStudentForm);
+function resetStudentForm(){ $("#stForm").reset(); $("#st_id").value=""; $("#stFormTitle").textContent="Add new student"; syncRoomGrid(); }
+$("#stReset").addEventListener("click",resetStudentForm);
 
-/* ============================================================
-   ATTENDANCE
-   ============================================================ */
-$("#atLoad").addEventListener("click", loadAttendance);
-$("#atAllPresent").addEventListener("click", ()=>{ attendanceState.forEach(r=>r.status="Present"); renderAttendance(); });
+/* ================================================================
+   ATTENDANCE — 3 sessions, 5 statuses, auto-prefill leave/outpass
+   ================================================================ */
+$("#atLoad").addEventListener("click",loadAttendance);
+$("#atAllPresent").addEventListener("click",()=>{ if(!attendanceState.length) return; attendanceState.forEach(r=>r.status="Present"); renderAttendance(); });
+["#at_wing","#at_date","#at_session"].forEach(sel=>$(sel).addEventListener("change",()=>{
+  attendanceState=[]; attendanceCtx=null;
+  $("#atListPanel").style.display="none"; $("#atMsgPanel").style.display="none"; $("#atErr").textContent="";
+}));
 
 async function loadAttendance(){
   const wing=$("#at_wing").value, date=$("#at_date").value, session=$("#at_session").value;
   if(!date){ toast("Pick a date"); return; }
-  const roster = STUDENTS.filter(s=>s.wing===wing);
-  if(!roster.length){ $("#atListPanel").style.display="block"; $("#atList").innerHTML='<div class="empty">No students in '+esc(wing)+' wing yet.</div>'; $("#atMsgPanel").style.display="none"; return; }
-  // existing marks for this date/session
-  const { data:existing } = await sb.from("attendance").select("student_id,status")
-      .eq("date",date).eq("session",session).eq("wing",wing);
-  const prior={}; (existing||[]).forEach(r=>prior[r.student_id]=r.status);
-  attendanceState = roster.map(s=>({ id:s.id, name:s.name, room:s.room, wing:s.wing, status: prior[s.id]||"Present" }));
+  const roster=STUDENTS.filter(s=>s.wing===wing);
+  $("#atListPanel").style.display="block"; $("#atMsgPanel").style.display="none";
+  if(!roster.length){ $("#atList").innerHTML='<div class="empty">No students in '+esc(wing)+' wing yet.</div>'; attendanceCtx=null; attendanceState=[]; return; }
+  const [ex,lv,op]=await Promise.all([
+    sb.from("attendance").select("student_id,status").eq("date",date).eq("session",session).eq("wing",wing),
+    sb.from("leaves").select("student_id,status").lte("from_date",date).gte("to_date",date),
+    sb.from("outpass").select("student_id").lte("date",date).is("returned_at",null)
+  ]);
+  const bad=[ex,lv,op].find(r=>r.error);
+  if(bad){ $("#atList").innerHTML='<div class="empty">Could not load: '+esc(bad.error.message)+'</div>'; attendanceCtx=null; attendanceState=[]; return; }
+  const prior={}; (ex.data||[]).forEach(r=>prior[r.student_id]=r.status);
+  const onLeave=new Set((lv.data||[]).filter(l=>l.status!=="Rejected").map(l=>l.student_id));
+  const onPass=new Set((op.data||[]).map(o=>o.student_id));
+  attendanceState=roster.map(s=>({ id:s.id,name:s.name,room:s.room,wing:s.wing,
+    status: prior[s.id]||(onLeave.has(s.id)?"Leave":onPass.has(s.id)?"Outpass":"Present") }));
+  attendanceCtx={wing,date,session};
   renderAttendance();
-  $("#atMsgPanel").style.display="none";
 }
-
 function renderAttendance(){
-  $("#atListPanel").style.display="block";
-  $("#atList").innerHTML = attendanceState.map((r,i)=>`
+  $("#atList").innerHTML=attendanceState.map((r,i)=>`
     <div class="att-row">
       <div class="grow"><div class="nm">${esc(r.name)}</div><div class="rm">${r.room?"Room "+esc(r.room):"—"}</div></div>
       <div class="seg">
-        <button class="P ${r.status==="Present"?"on":""}" onclick="setAtt(${i},'Present')">P</button>
-        <button class="A ${r.status==="Absent"?"on":""}" onclick="setAtt(${i},'Absent')">A</button>
-        <button class="L ${r.status==="Leave"?"on":""}" onclick="setAtt(${i},'Leave')">L</button>
+        ${["Present:P","Absent:A","Leave:L","Outpass:O","Sick:S"].map(x=>{
+          const st=x.split(":")[0], k=x.split(":")[1];
+          return `<button class="${k}${r.status===st?" on":""}" onclick="setAtt(${i},'${st}')" title="${st}">${k}</button>`;
+        }).join("")}
       </div>
     </div>`).join("");
 }
 window.setAtt=(i,st)=>{ attendanceState[i].status=st; renderAttendance(); };
 
-$("#atSave").addEventListener("click", async ()=>{
+$("#atSave").addEventListener("click",async ()=>{
   const err=$("#atErr"); err.textContent="";
-  if(!attendanceState.length){ err.textContent="Load a list first."; return; }
-  const wing=$("#at_wing").value, date=$("#at_date").value, session=$("#at_session").value;
-  const rows=attendanceState.map(r=>({
-    date, session, wing, student_id:r.id, student_name:r.name, room:r.room||null, status:r.status
-  }));
+  if(!attendanceCtx||!attendanceState.length){ err.textContent="Load a list first."; return; }
+  const {wing,date,session}=attendanceCtx;
+  const rows=attendanceState.map(r=>({ date,session,wing:r.wing||wing,student_id:r.id,
+    student_name:r.name,room:r.room||null,status:r.status,marked_by:isAdmin()?"Principal":"Warden" }));
   const btn=$("#atSave"); btn.disabled=true; btn.innerHTML='<span class="spin"></span>';
-  const { error }=await sb.from("attendance").upsert(rows,{ onConflict:"date,session,student_id" });
+  const {error}=await sb.from("attendance").upsert(rows,{onConflict:"date,session,student_id"});
   btn.disabled=false; btn.textContent="Save attendance";
   if(error){ err.textContent=error.message; return; }
   toast("Attendance saved");
@@ -607,227 +845,371 @@ $("#atSave").addEventListener("click", async ()=>{
 
 function buildWhatsApp(wing,date,session){
   const tot=attendanceState.length;
-  const present=attendanceState.filter(r=>r.status==="Present").length;
-  const absent=attendanceState.filter(r=>r.status==="Absent");
-  const leave=attendanceState.filter(r=>r.status==="Leave");
-  const nm=r=>r.name+(r.room?` (${r.room})`:"");
-  let m=`🏨 ${wing} Wing Hostel\n📅 ${fmtDate(date)} · ${session} Attendance\n`;
-  m+=`👥 Total ${tot} · ✅ Present ${present} · ❌ Absent ${absent.length} · 🌴 Leave ${leave.length}\n`;
-  if(absent.length) m+=`\n❌ Absent: ${absent.map(nm).join(", ")}`;
-  if(leave.length)  m+=`\n🌴 On leave: ${leave.map(nm).join(", ")}`;
-  if(!absent.length && !leave.length) m+=`\n🎉 All present.`;
-  $("#atMsg").textContent=m;
-  $("#atMsgPanel").style.display="block";
-  $("#atMsgPanel").dataset.msg=m;
+  const c=st=>attendanceState.filter(r=>r.status===st);
+  const nm=r=>r.name+(r.room?" ("+r.room+")":"");
+  let m=`BALUNI SCHOOL OF COMPETITION\n${wing} Wing Hostel — ${session} Attendance\nDate: ${fmtDate(date)}\n\n`;
+  m+=`Total: ${tot}\nPresent: ${c("Present").length}\nAbsent: ${c("Absent").length}\nLeave: ${c("Leave").length}\nOutpass: ${c("Outpass").length}\nSick: ${c("Sick").length}\n`;
+  if(c("Absent").length) m+=`\nAbsent: ${c("Absent").map(nm).join(", ")}`;
+  if(c("Leave").length)  m+=`\nOn leave: ${c("Leave").map(nm).join(", ")}`;
+  if(c("Outpass").length)m+=`\nOn outpass: ${c("Outpass").map(nm).join(", ")}`;
+  if(c("Sick").length)   m+=`\nSick: ${c("Sick").map(nm).join(", ")}`;
+  if(tot===c("Present").length) m+=`\nAll present.`;
+  m+=`\n\nMarked by: ${isAdmin()?"Principal":"Warden"}`;
+  $("#atMsg").textContent=m; $("#atMsgPanel").style.display="block"; $("#atMsgPanel").dataset.msg=m;
   $("#atMsgPanel").scrollIntoView({behavior:"smooth"});
 }
-$("#atCopy").addEventListener("click", async ()=>{
-  const m=$("#atMsgPanel").dataset.msg||"";
-  try{ await navigator.clipboard.writeText(m); toast("Copied — paste into the group"); }
-  catch{ toast("Press and hold the text to copy"); }
-});
-$("#atShare").addEventListener("click", ()=>{
-  const m=$("#atMsgPanel").dataset.msg||"";
-  window.open("https://wa.me/?text="+encodeURIComponent(m),"_blank");
-});
+async function copyText(m){ try{ await navigator.clipboard.writeText(m); toast("Copied"); }catch{ toast("Press and hold the text to copy"); } }
+$("#atCopy").addEventListener("click",()=>copyText($("#atMsgPanel").dataset.msg||""));
+$("#atShare").addEventListener("click",()=>window.open("https://wa.me/?text="+encodeURIComponent($("#atMsgPanel").dataset.msg||""),"_blank"));
 
-/* ============================================================
-   FINES
-   ============================================================ */
-$("#fnForm").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  const err=$("#fnErr"); err.textContent="";
-  const s=STUDENTS.find(x=>x.id===$("#fn_student").value);
-  if(!s){ err.textContent="Pick a student."; return; }
-  const rec={ student_id:s.id, student_name:s.name, wing:s.wing,
-    amount:Number($("#fn_amount").value)||0, reason:$("#fn_reason").value.trim(),
-    paid: $("#fn_paid").value==="true", collected_by:$("#fn_by").value.trim(), date:todayStr() };
-  const { error }=await sb.from("fines").insert(rec);
-  if(error){ err.textContent=error.message; return; }
-  toast("Fine added"); e.target.reset(); loadFines();
-});
-async function loadFines(){
-  const { data, error }=await sb.from("fines").select("*").order("created_at",{ascending:false});
-  if(error){ $("#fnList").innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
-  const unpaid=(data||[]).filter(f=>!f.paid).reduce((a,f)=>a+Number(f.amount||0),0);
-  $("#fnTotal").textContent = `· Unpaid ₹${unpaid}`;
-  const el=$("#fnList");
-  if(!data||!data.length){ el.innerHTML='<div class="empty">No fines yet.</div>'; return; }
-  el.innerHTML=data.map(f=>`
-    <div class="item"><div class="top">
-      <div class="grow">
-        <div class="name">${esc(f.student_name)} ${wingTag(f.wing)} <span class="tag ${f.paid?"green":"red"}">${f.paid?"Paid":"Unpaid"}</span></div>
-        <div class="meta">₹${esc(f.amount)} · ${esc(f.reason||"—")} · ${fmtDate(f.date)}${f.collected_by?` · by ${esc(f.collected_by)}`:""}</div>
-      </div>
-    </div>
-    <div class="actions" style="margin-top:8px">
-      <button class="iconbtn" onclick="toggleFine('${f.id}',${f.paid})">${f.paid?"Mark unpaid":"Mark paid"}</button>
-      <button class="iconbtn" onclick="delRec('fines','${f.id}',loadFines)">Delete</button>
-    </div></div>`).join("");
-}
-window.toggleFine=async (id,paid)=>{ const {error}=await sb.from("fines").update({paid:!paid}).eq("id",id); if(error){toast(error.message);return;} loadFines(); };
-
-/* ============================================================
-   MEDICAL
-   ============================================================ */
-$("#mdForm").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  const err=$("#mdErr"); err.textContent="";
-  const s=STUDENTS.find(x=>x.id===$("#md_student").value);
-  if(!s){ err.textContent="Pick a student."; return; }
-  const rec={ student_id:s.id, student_name:s.name, wing:s.wing, condition:$("#md_cond").value.trim(),
-    treatment:$("#md_treat").value.trim(), severity:$("#md_sev").value, date:todayStr() };
-  const { error }=await sb.from("medical").insert(rec);
-  if(error){ err.textContent=error.message; return; }
-  toast("Medical record added"); e.target.reset(); loadMedical();
-});
-async function loadMedical(){
-  const { data, error }=await sb.from("medical").select("*").order("created_at",{ascending:false});
-  const el=$("#mdList");
-  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
-  if(!data||!data.length){ el.innerHTML='<div class="empty">No records yet.</div>'; return; }
-  const sevTag=s=>s==="High"?"red":s==="Medium"?"gold":"grey";
-  el.innerHTML=data.map(m=>`
-    <div class="item"><div class="top"><div class="grow">
-      <div class="name">${esc(m.student_name)} ${wingTag(m.wing)} <span class="tag ${sevTag(m.severity)}">${esc(m.severity||"—")}</span></div>
-      <div class="meta">${esc(m.condition||"—")} · ${fmtDate(m.date)}</div>
-      ${m.treatment?`<div class="meta">Rx: ${esc(m.treatment)}</div>`:""}
-    </div></div>
-    <div class="actions" style="margin-top:8px"><button class="iconbtn" onclick="delRec('medical','${m.id}',loadMedical)">Delete</button></div></div>`).join("");
-}
-
-/* ============================================================
+/* ================================================================
    LEAVE
-   ============================================================ */
-$("#lvForm").addEventListener("submit", async (e)=>{
+   ================================================================ */
+$("#lvForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const err=$("#lvErr"); err.textContent="";
   const s=STUDENTS.find(x=>x.id===$("#lv_student").value);
   if(!s){ err.textContent="Pick a student."; return; }
-  if($("#lv_to").value < $("#lv_from").value){ err.textContent="'To' date is before 'From' date."; return; }
-  const rec={ student_id:s.id, student_name:s.name, wing:s.wing, from_date:$("#lv_from").value,
-    to_date:$("#lv_to").value, reason:$("#lv_reason").value.trim(), destination:$("#lv_dest").value.trim(),
-    approved_by:$("#lv_by").value.trim() };
-  const { error }=await sb.from("leaves").insert(rec);
+  if($("#lv_to").value<$("#lv_from").value){ err.textContent="'To' date is before 'From' date."; return; }
+  const rec={ student_id:s.id,student_name:s.name,wing:s.wing,from_date:$("#lv_from").value,
+    to_date:$("#lv_to").value,reason:$("#lv_reason").value.trim(),destination:$("#lv_dest").value.trim(),
+    parent_consent:$("#lv_consent").value==="true",approved_by:$("#lv_by").value.trim(),status:"Approved" };
+  const {error}=await sb.from("leaves").insert(rec);
   if(error){ err.textContent=error.message; return; }
   toast("Leave added"); e.target.reset(); loadLeave();
 });
 async function loadLeave(){
-  const { data, error }=await sb.from("leaves").select("*").order("from_date",{ascending:false});
-  const el=$("#lvList"); const today=todayStr();
-  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
+  const {data,error}=await sb.from("leaves").select("*").order("from_date",{ascending:false}).limit(200);
+  const el=$("#lvList"); if(chkErr(error,el)) return;
+  const today=todayStr();
   if(!data||!data.length){ el.innerHTML='<div class="empty">No leave records.</div>'; return; }
   el.innerHTML=data.map(l=>{
-    const active = l.from_date<=today && today<=l.to_date;
-    return `<div class="item"><div class="top"><div class="grow">
-      <div class="name">${esc(l.student_name)} ${wingTag(l.wing)} ${active?'<span class="tag gold">On leave now</span>':""}</div>
-      <div class="meta">${fmtDate(l.from_date)} → ${fmtDate(l.to_date)} · ${esc(l.reason||"—")}${l.destination?` · to ${esc(l.destination)}`:""}</div>
-      ${l.approved_by?`<div class="meta">Approved by ${esc(l.approved_by)}</div>`:""}
+    const active=l.status!=="Rejected"&&l.from_date<=today&&today<=l.to_date;
+    return `<div class="rowc"><div class="top"><div class="grow">
+      <div class="nm">${esc(l.student_name)} ${wingPill(l.wing)} ${active?'<span class="pill amber">On leave now</span>':""} ${l.parent_consent?'<span class="pill green">Consent ✓</span>':'<span class="pill grey">No consent</span>'}</div>
+      <div class="meta">${fmtDate(l.from_date)} → ${fmtDate(l.to_date)} · ${esc(l.reason||"—")}${l.destination?" · to "+esc(l.destination):""}${l.approved_by?" · by "+esc(l.approved_by):""}</div>
     </div></div>
-    <div class="actions" style="margin-top:8px"><button class="iconbtn" onclick="delRec('leaves','${l.id}',loadLeave)">Delete</button></div></div>`;
+    <div class="acts adminonly"><button class="iconbtn danger" onclick="delRec('leaves','${l.id}',loadLeave)">Delete</button></div></div>`;
   }).join("");
 }
 
-/* ============================================================
-   DEFAULTERS
-   ============================================================ */
-$("#dfForm").addEventListener("submit", async (e)=>{
+/* ================================================================
+   OUTPASS
+   ================================================================ */
+$("#opForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  const err=$("#dfErr"); err.textContent="";
-  const s=STUDENTS.find(x=>x.id===$("#df_student").value);
+  const err=$("#opErr"); err.textContent="";
+  const s=STUDENTS.find(x=>x.id===$("#op_student").value);
   if(!s){ err.textContent="Pick a student."; return; }
-  const rec={ student_id:s.id, student_name:s.name, wing:s.wing, violation:$("#df_violation").value.trim(),
-    action:$("#df_action").value.trim(), resolved:false, date:todayStr() };
-  const { error }=await sb.from("defaulters").insert(rec);
+  const rec={ student_id:s.id,student_name:s.name,wing:s.wing,date:$("#op_date").value||todayStr(),
+    time_out:$("#op_out").value,expected_return:$("#op_ret").value,destination:$("#op_dest").value.trim(),
+    guardian_name:$("#op_gname").value.trim(),guardian_phone:$("#op_gphone").value.trim(),
+    issued_by:$("#op_by").value.trim() };
+  const {error}=await sb.from("outpass").insert(rec);
   if(error){ err.textContent=error.message; return; }
-  toast("Defaulter added"); e.target.reset(); loadDefaulters();
+  toast("Outpass issued"); e.target.reset(); $("#op_date").value=todayStr(); loadOutpass();
 });
-async function loadDefaulters(){
-  const { data, error }=await sb.from("defaulters").select("*").order("created_at",{ascending:false});
-  const el=$("#dfList");
-  if(error){ el.innerHTML='<div class="empty">'+esc(error.message)+'</div>'; return; }
-  if(!data||!data.length){ el.innerHTML='<div class="empty">No defaulters.</div>'; return; }
-  el.innerHTML=data.map(d=>`
-    <div class="item"><div class="top"><div class="grow">
-      <div class="name">${esc(d.student_name)} ${wingTag(d.wing)} <span class="tag ${d.resolved?"green":"red"}">${d.resolved?"Resolved":"Open"}</span></div>
-      <div class="meta">${esc(d.violation||"—")} · ${fmtDate(d.date)}</div>
-      ${d.action?`<div class="meta">Action: ${esc(d.action)}</div>`:""}
+async function loadOutpass(){
+  const {data,error}=await sb.from("outpass").select("*").order("created_at",{ascending:false}).limit(200);
+  const el=$("#opList"); if(chkErr(error,el)) return;
+  const open=(data||[]).filter(o=>!o.returned_at).length;
+  $("#opOpen").textContent=open?("· "+open+" still out"):"";
+  if(!data||!data.length){ el.innerHTML='<div class="empty">No outpasses yet.</div>'; return; }
+  el.innerHTML=data.map(o=>`
+    <div class="rowc"><div class="top"><div class="grow">
+      <div class="nm">#${esc(o.pass_no)} · ${esc(o.student_name)} ${wingPill(o.wing)} ${o.returned_at?'<span class="pill green">Returned</span>':'<span class="pill red">Out</span>'}</div>
+      <div class="meta">${fmtDate(o.date)} · out ${esc(o.time_out||"—")} · expected ${esc(o.expected_return||"—")}${o.destination?" · "+esc(o.destination):""}</div>
+      <div class="meta">${o.guardian_name?"With "+esc(o.guardian_name):""}${o.guardian_phone?" ("+esc(o.guardian_phone)+")":""}${o.issued_by?" · issued by "+esc(o.issued_by):""}</div>
     </div></div>
-    <div class="actions" style="margin-top:8px">
-      <button class="iconbtn" onclick="toggleDef('${d.id}',${d.resolved})">${d.resolved?"Reopen":"Mark resolved"}</button>
-      <button class="iconbtn" onclick="delRec('defaulters','${d.id}',loadDefaulters)">Delete</button>
+    <div class="acts">
+      ${o.returned_at?"":`<button class="iconbtn" onclick="markReturn('${o.id}')">Mark returned</button>`}
+      <button class="iconbtn danger adminonly" onclick="delRec('outpass','${o.id}',loadOutpass)">Delete</button>
     </div></div>`).join("");
 }
-window.toggleDef=async (id,r)=>{ const {error}=await sb.from("defaulters").update({resolved:!r}).eq("id",id); if(error){toast(error.message);return;} loadDefaulters(); };
+window.markReturn=async id=>{
+  const {error}=await sb.from("outpass").update({returned_at:new Date().toISOString()}).eq("id",id);
+  if(error){ toast(error.message); return; }
+  toast("Marked returned"); loadOutpass();
+};
 
-/* generic delete */
-window.delRec=async (table,id,reload)=>{ if(!confirm("Delete this record?")) return; const {error}=await sb.from(table).delete().eq("id",id); if(error){toast(error.message);return;} toast("Deleted"); reload(); };
-
-/* ============================================================
-   DASHBOARD
-   ============================================================ */
-async function renderDashboard(){
-  const wf=wingSel(); const today=todayStr();
-  const el=$("#dashBody"); el.innerHTML='<div class="empty">Loading…</div>';
-
-  const inWing=s=>wf==="all"||s.wing===wf;
-  const sen=STUDENTS.filter(s=>s.wing==="Senior").length;
-  const jun=STUDENTS.filter(s=>s.wing==="Junior").length;
-  const totalStudents=STUDENTS.filter(inWing).length;
-
-  // pull today's data in parallel
-  const [att, fines, defs, lvs] = await Promise.all([
-    sb.from("attendance").select("session,wing,status").eq("date",today),
-    sb.from("fines").select("amount,paid,wing").eq("paid",false),
-    sb.from("defaulters").select("wing").eq("resolved",false),
-    sb.from("leaves").select("wing,from_date,to_date")
-  ]);
-  const A=(att.data||[]).filter(inWing);
-  const cnt=(ses,st)=>A.filter(r=>r.session===ses&&r.status===st).length;
-  const unpaid=(fines.data||[]).filter(inWing).reduce((a,f)=>a+Number(f.amount||0),0);
-  const openDef=(defs.data||[]).filter(inWing).length;
-  const onLeave=(lvs.data||[]).filter(l=>inWing(l)&&l.from_date<=today&&today<=l.to_date).length;
-
-  function sessLine(ses){
-    const has=A.some(r=>r.session===ses);
-    if(!has) return `<div class="meta">${ses}: <span class="tag grey">not taken yet</span></div>`;
-    return `<div class="meta">${ses}: <b>${cnt(ses,"Present")}</b> present · ${cnt(ses,"Absent")} absent · ${cnt(ses,"Leave")} leave</div>`;
-  }
-
-  el.innerHTML=`
-    <div class="panel">
-      <h3>Students</h3>
-      <div class="stats">
-        <div class="stat"><div class="n">${totalStudents}</div><div class="l">${wf==="all"?"Total students":wf+" wing"}</div></div>
-        <div class="stat"><div class="n">${sen} / ${jun}</div><div class="l">Senior / Junior</div></div>
-      </div>
-    </div>
-    <div class="panel">
-      <h3>Today's attendance · ${fmtDate(today)}</h3>
-      ${sessLine("Morning")}
-      ${sessLine("Night")}
-    </div>
-    <div class="panel">
-      <div class="stats">
-        <div class="stat"><div class="n">₹${unpaid}</div><div class="l">Unpaid fines</div></div>
-        <div class="stat"><div class="n">${openDef}</div><div class="l">Open defaulters</div></div>
-        <div class="stat"><div class="n">${onLeave}</div><div class="l">On leave now</div></div>
-        <div class="stat"><div class="n">${STUDENTS.filter(s=>inWing(s)&&s.medical_condition&&s.medical_condition.toLowerCase()!=="none"&&s.medical_condition!=="").length}</div><div class="l">Medical flags</div></div>
-      </div>
-    </div>`;
+/* ================================================================
+   MEDICAL
+   ================================================================ */
+$("#mdForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const err=$("#mdErr"); err.textContent="";
+  const s=STUDENTS.find(x=>x.id===$("#md_student").value);
+  if(!s){ err.textContent="Pick a student."; return; }
+  const rec={ student_id:s.id,student_name:s.name,wing:s.wing,condition:$("#md_cond").value.trim(),
+    treatment:$("#md_treat").value.trim(),severity:$("#md_sev").value,date:todayStr() };
+  const {error}=await sb.from("medical").insert(rec);
+  if(error){ err.textContent=error.message; return; }
+  toast("Medical record added"); e.target.reset(); loadMedical();
+});
+async function loadMedical(){
+  const {data,error}=await sb.from("medical").select("*").order("created_at",{ascending:false}).limit(200);
+  const el=$("#mdList"); if(chkErr(error,el)) return;
+  if(!data||!data.length){ el.innerHTML='<div class="empty">No records yet.</div>'; return; }
+  const sev=s=>s==="High"?"red":s==="Medium"?"amber":"grey";
+  el.innerHTML=data.map(m=>`
+    <div class="rowc"><div class="top"><div class="grow">
+      <div class="nm">${esc(m.student_name)} ${wingPill(m.wing)} <span class="pill ${sev(m.severity)}">${esc(m.severity||"—")}</span></div>
+      <div class="meta">${esc(m.condition||"—")} · ${fmtDate(m.date)}</div>
+      ${m.treatment?'<div class="meta">Treatment: '+esc(m.treatment)+'</div>':""}
+    </div></div>
+    <div class="acts adminonly"><button class="iconbtn danger" onclick="delRec('medical','${m.id}',loadMedical)">Delete</button></div></div>`).join("");
 }
 
-/* ============================================================
-   SETTINGS — change shared password
-   ============================================================ */
-$("#pwForm").addEventListener("submit", async (e)=>{
+/* ================================================================
+   DISCIPLINE
+   ================================================================ */
+$("#dcForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const err=$("#dcErr"); err.textContent="";
+  const s=STUDENTS.find(x=>x.id===$("#dc_student").value);
+  if(!s){ err.textContent="Pick a student."; return; }
+  const rec={ student_id:s.id,student_name:s.name,wing:s.wing,category:$("#dc_cat").value,
+    details:$("#dc_details").value.trim(),action:$("#dc_action").value.trim(),
+    points:Number($("#dc_points").value)||1,reported_by:$("#dc_by").value.trim(),date:todayStr() };
+  const {error}=await sb.from("discipline").insert(rec);
+  if(error){ err.textContent=error.message; return; }
+  toast("Entry added"); e.target.reset(); $("#dc_points").value=1; loadDiscipline();
+});
+async function loadDiscipline(){
+  const {data,error}=await sb.from("discipline").select("*").order("created_at",{ascending:false}).limit(200);
+  const el=$("#dcList"); if(chkErr(error,el)) return;
+  const open=(data||[]).filter(d=>!d.resolved).length;
+  $("#dcOpen").textContent=open?("· "+open+" open"):"";
+  if(!data||!data.length){ el.innerHTML='<div class="empty">No entries.</div>'; return; }
+  el.innerHTML=data.map(d=>`
+    <div class="rowc"><div class="top"><div class="grow">
+      <div class="nm">${esc(d.student_name)} ${wingPill(d.wing)} <span class="pill ${d.resolved?"green":"red"}">${d.resolved?"Resolved":"Open"}</span> <span class="pill grey">${esc(d.category||"—")} · ${esc(d.points)} pt</span></div>
+      <div class="meta">${esc(d.details||"—")} · ${fmtDate(d.date)}${d.reported_by?" · by "+esc(d.reported_by):""}</div>
+      ${d.action?'<div class="meta">Action: '+esc(d.action)+'</div>':""}
+    </div></div>
+    <div class="acts adminonly">
+      <button class="iconbtn" onclick="toggleDisc('${d.id}',${d.resolved})">${d.resolved?"Reopen":"Mark resolved"}</button>
+      <button class="iconbtn danger" onclick="delRec('discipline','${d.id}',loadDiscipline)">Delete</button>
+    </div></div>`).join("");
+}
+window.toggleDisc=async(id,r)=>{ const {error}=await sb.from("discipline").update({resolved:!r}).eq("id",id); if(error){toast(error.message);return;} loadDiscipline(); };
+
+/* ================================================================
+   FINES
+   ================================================================ */
+$("#fnForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const err=$("#fnErr"); err.textContent="";
+  const s=STUDENTS.find(x=>x.id===$("#fn_student").value);
+  if(!s){ err.textContent="Pick a student."; return; }
+  const rec={ student_id:s.id,student_name:s.name,wing:s.wing,amount:Number($("#fn_amount").value)||0,
+    reason:$("#fn_reason").value.trim(),paid:$("#fn_paid").value==="true",
+    collected_by:$("#fn_by").value.trim(),date:todayStr() };
+  const {error}=await sb.from("fines").insert(rec);
+  if(error){ err.textContent=error.message; return; }
+  toast("Fine added"); e.target.reset(); loadFines();
+});
+async function loadFines(){
+  const {data,error}=await sb.from("fines").select("*").order("created_at",{ascending:false}).limit(200);
+  const el=$("#fnList"); if(chkErr(error,el)) return;
+  const unpaid=(data||[]).filter(f=>!f.paid).reduce((a,f)=>a+Number(f.amount||0),0);
+  $("#fnTotal").textContent="· ₹"+unpaid+" unpaid";
+  if(!data||!data.length){ el.innerHTML='<div class="empty">No fines.</div>'; return; }
+  el.innerHTML=data.map(f=>`
+    <div class="rowc"><div class="top"><div class="grow">
+      <div class="nm">${esc(f.student_name)} ${wingPill(f.wing)} <span class="pill ${f.paid?"green":"red"}">${f.paid?"Paid":"Unpaid"}</span></div>
+      <div class="meta">₹${esc(f.amount)} · ${esc(f.reason||"—")} · ${fmtDate(f.date)}${f.collected_by?" · by "+esc(f.collected_by):""}</div>
+    </div></div>
+    <div class="acts adminonly">
+      <button class="iconbtn" onclick="toggleFine('${f.id}',${f.paid})">${f.paid?"Mark unpaid":"Mark paid"}</button>
+      <button class="iconbtn danger" onclick="delRec('fines','${f.id}',loadFines)">Delete</button>
+    </div></div>`).join("");
+}
+window.toggleFine=async(id,p)=>{ const {error}=await sb.from("fines").update({paid:!p}).eq("id",id); if(error){toast(error.message);return;} loadFines(); };
+
+/* ================================================================
+   COMPLAINTS
+   ================================================================ */
+$("#cpForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const err=$("#cpErr"); err.textContent="";
+  const s=STUDENTS.find(x=>x.id===$("#cp_student").value);
+  const rec={ source:$("#cp_source").value,category:$("#cp_cat").value,details:$("#cp_details").value.trim(),
+    student_id:s?s.id:null,student_name:s?s.name:null,wing:s?s.wing:null,status:"Pending",date:todayStr() };
+  if(!rec.details){ err.textContent="Write the complaint details."; return; }
+  const {error}=await sb.from("complaints").insert(rec);
+  if(error){ err.textContent=error.message; return; }
+  toast("Complaint registered"); e.target.reset(); loadComplaints();
+});
+async function loadComplaints(){
+  const {data,error}=await sb.from("complaints").select("*").order("created_at",{ascending:false}).limit(200);
+  const el=$("#cpList"); if(chkErr(error,el)) return;
+  const open=(data||[]).filter(c=>c.status!=="Resolved").length;
+  $("#cpOpen").textContent=open?("· "+open+" pending"):"";
+  if(!data||!data.length){ el.innerHTML='<div class="empty">No complaints.</div>'; return; }
+  const stp=s=>s==="Resolved"?"green":s==="In Progress"?"amber":"red";
+  el.innerHTML=data.map(c=>`
+    <div class="rowc"><div class="top"><div class="grow">
+      <div class="nm">Ticket #${esc(c.ticket_no)} <span class="pill grey">${esc(c.source)}</span> <span class="pill blue">${esc(c.category)}</span> <span class="pill ${stp(c.status)}">${esc(c.status)}</span></div>
+      <div class="meta">${c.student_name?esc(c.student_name)+" · ":""}${fmtDate(c.date)}</div>
+      <div class="meta">${esc(c.details||"")}</div>
+    </div></div>
+    <div class="acts adminonly">
+      <button class="iconbtn" onclick="cycleComplaint('${c.id}','${esc(c.status)}')">Next status</button>
+      <button class="iconbtn danger" onclick="delRec('complaints','${c.id}',loadComplaints)">Delete</button>
+    </div></div>`).join("");
+}
+window.cycleComplaint=async(id,cur)=>{
+  const next=cur==="Pending"?"In Progress":cur==="In Progress"?"Resolved":"Pending";
+  const {error}=await sb.from("complaints").update({status:next}).eq("id",id);
+  if(error){ toast(error.message); return; }
+  loadComplaints();
+};
+
+/* ================================================================
+   PARENT CALLS — weekly ≥10 min tracker
+   ================================================================ */
+function minsBetween(a,b){
+  if(!a||!b) return null;
+  const p1=a.split(":").map(Number), p2=b.split(":").map(Number);
+  let d=(p2[0]*60+p2[1])-(p1[0]*60+p1[1]); if(d<0) d+=24*60; return d;
+}
+$("#pcForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const err=$("#pcErr"); err.textContent="";
+  const s=STUDENTS.find(x=>x.id===$("#pc_student").value);
+  if(!s){ err.textContent="Pick a student."; return; }
+  const mins=minsBetween($("#pc_start").value,$("#pc_end").value);
+  const rec={ student_id:s.id,student_name:s.name,wing:s.wing,call_date:$("#pc_date").value||todayStr(),
+    start_time:$("#pc_start").value,end_time:$("#pc_end").value,minutes:mins,
+    parent_name:$("#pc_parent").value.trim(),staff_name:$("#pc_staff").value.trim(),notes:$("#pc_notes").value.trim() };
+  const {error}=await sb.from("parent_calls").insert(rec);
+  if(error){ err.textContent=error.message; return; }
+  toast(mins!=null&&mins<10?"Logged — note: under 10 minutes":"Call logged");
+  e.target.reset(); $("#pc_date").value=todayStr(); loadCalls();
+});
+async function loadCalls(){
+  const since=new Date(); since.setDate(since.getDate()-7);
+  const sinceStr=since.toLocaleDateString("en-CA");
+  const {data,error}=await sb.from("parent_calls").select("*").order("call_date",{ascending:false}).limit(300);
+  const el=$("#pcList"); if(chkErr(error,el)) return;
+  const calls=data||[];
+  const called=new Set(calls.filter(c=>c.call_date>=sinceStr).map(c=>c.student_id));
+  const wf=wingSel();
+  const due=STUDENTS.filter(s=>(wf==="all"||s.wing===wf)&&!called.has(s.id));
+  $("#pcDueN").textContent=due.length?("· "+due.length+" students"):"";
+  $("#pcDue").innerHTML=due.length?due.map(s=>`
+    <div class="rowc"><div class="top"><div class="grow">
+      <div class="nm">${esc(s.name)} ${wingPill(s.wing)} <span class="pill red">No call in 7 days</span></div>
+      <div class="meta">${s.room?"Room "+esc(s.room):""}</div>
+    </div></div></div>`).join(""):'<div class="empty">Everyone has spoken to parents this week.</div>';
+  if(!calls.length){ el.innerHTML='<div class="empty">No calls logged yet.</div>'; return; }
+  el.innerHTML=calls.slice(0,60).map(c=>`
+    <div class="rowc"><div class="top"><div class="grow">
+      <div class="nm">${esc(c.student_name)} ${wingPill(c.wing)} ${c.minutes!=null?`<span class="pill ${c.minutes>=10?"green":"red"}">${esc(c.minutes)} min</span>`:""}</div>
+      <div class="meta">${fmtDate(c.call_date)}${c.start_time?" · "+esc(c.start_time)+"–"+esc(c.end_time||"?"):""}${c.parent_name?" · with "+esc(c.parent_name):""}${c.staff_name?" · staff: "+esc(c.staff_name):""}</div>
+      ${c.notes?'<div class="meta">'+esc(c.notes)+'</div>':""}
+    </div></div>
+    <div class="acts adminonly"><button class="iconbtn danger" onclick="delRec('parent_calls','${c.id}',loadCalls)">Delete</button></div></div>`).join("");
+}
+
+/* generic delete (principal only — the database enforces this too) */
+window.delRec=async(table,id,reload)=>{
+  if(!confirm("Delete this record?")) return;
+  const {error}=await sb.from(table).delete().eq("id",id);
+  if(error){ toast(error.message); return; }
+  toast("Deleted"); reload();
+};
+
+/* ================================================================
+   DASHBOARD + DAILY REPORT
+   ================================================================ */
+async function renderDashboard(){
+  const wf=wingSel(), today=todayStr(), el=$("#dashBody");
+  el.innerHTML='<div class="empty">Loading…</div>';
+  const inW=r=>wf==="all"||r.wing===wf;
+  const results=await Promise.all([
+    sb.from("attendance").select("session,wing,status").eq("date",today),
+    sb.from("fines").select("amount,wing").eq("paid",false),
+    sb.from("discipline").select("wing").eq("resolved",false),
+    sb.from("complaints").select("wing,status").neq("status","Resolved"),
+    sb.from("leaves").select("wing,status").lte("from_date",today).gte("to_date",today),
+    sb.from("outpass").select("wing").is("returned_at",null),
+    sb.from("medical").select("wing,severity").eq("date",today)
+  ]);
+  const bad=results.find(r=>r.error);
+  if(bad){ el.innerHTML='<div class="empty">Could not load dashboard: '+esc(bad.error.message)+'</div>'; return; }
+  const F=results.map(r=>(r.data||[]).filter(inW));
+  const att=F[0], fines=F[1], disc=F[2], compl=F[3], lvs=F[4], ops=F[5], med=F[6];
+  const students=STUDENTS.filter(s=>wf==="all"||s.wing===wf);
+  const cnt=(ses,st)=>att.filter(r=>r.session===ses&&r.status===st).length;
+  const unpaid=fines.reduce((a,f)=>a+Number(f.amount||0),0);
+  const onLeave=lvs.filter(l=>l.status!=="Rejected").length;
+  const sess=ses=>{
+    if(!att.some(r=>r.session===ses)) return `<div class="meta" style="margin-top:4px">${ses}: <span class="pill grey">not taken yet</span></div>`;
+    return `<div class="meta" style="margin-top:4px">${ses}: <b>${cnt(ses,"Present")}</b> present · ${cnt(ses,"Absent")} absent · ${cnt(ses,"Leave")} leave · ${cnt(ses,"Outpass")} outpass · ${cnt(ses,"Sick")} sick</div>`;
+  };
+  el.innerHTML=`
+    <div class="stats" style="margin-bottom:14px">
+      <div class="stat"><div class="n">${students.length}</div><div class="l">${wf==="all"?"Total students":wf+" wing students"}</div></div>
+      <div class="stat"><div class="n">${onLeave}</div><div class="l">On leave now</div></div>
+      <div class="stat"><div class="n">${ops.length}</div><div class="l">Out on pass</div></div>
+      <div class="stat ${med.length?"warn":""}"><div class="n">${med.length}</div><div class="l">Medical cases today</div></div>
+      <div class="stat ${unpaid?"warn":""}"><div class="n">₹${unpaid}</div><div class="l">Unpaid fines</div></div>
+      <div class="stat ${disc.length?"warn":""}"><div class="n">${disc.length}</div><div class="l">Open discipline cases</div></div>
+      <div class="stat ${compl.length?"warn":""}"><div class="n">${compl.length}</div><div class="l">Pending complaints</div></div>
+    </div>
+    <div class="card"><h3>Today's attendance · ${fmtDate(today)}</h3>${sess("Morning")}${sess("Evening")}${sess("Night")}</div>`;
+}
+
+$("#rpGen").addEventListener("click",async ()=>{
+  const date=$("#rp_date").value||todayStr();
+  const btn=$("#rpGen"); btn.disabled=true; btn.textContent="Generating…";
+  const results=await Promise.all([
+    sb.from("attendance").select("session,status,student_name").eq("date",date),
+    sb.from("leaves").select("student_name,status").lte("from_date",date).gte("to_date",date),
+    sb.from("outpass").select("student_name,returned_at").eq("date",date),
+    sb.from("discipline").select("student_name,category").eq("date",date),
+    sb.from("complaints").select("category").eq("date",date),
+    sb.from("medical").select("student_name,severity").eq("date",date)
+  ]);
+  btn.disabled=false; btn.textContent="Generate report";
+  const bad=results.find(r=>r.error);
+  if(bad){ toast("Report failed: "+bad.error.message); return; }
+  const D=results.map(r=>r.data||[]);
+  const att=D[0], lvs=D[1], ops=D[2], disc=D[3], compl=D[4], med=D[5];
+  let m=`BALUNI SCHOOL OF COMPETITION\nHOSTEL DAILY REPORT\nDate: ${fmtDate(date)}\n\nTotal hostel students: ${STUDENTS.length}\n`;
+  for(const ses of ["Morning","Evening","Night"]){
+    const A=att.filter(r=>r.session===ses);
+    if(!A.length){ m+=`\n${ses}: not taken`; continue; }
+    const c=st=>A.filter(r=>r.status===st).length;
+    m+=`\n${ses}: Present ${c("Present")} · Absent ${c("Absent")} · Leave ${c("Leave")} · Outpass ${c("Outpass")} · Sick ${c("Sick")}`;
+    const abs=A.filter(r=>r.status==="Absent");
+    if(abs.length) m+=`\n  Absent: ${abs.map(r=>r.student_name).join(", ")}`;
+  }
+  const onLv=lvs.filter(l=>l.status!=="Rejected");
+  if(onLv.length) m+=`\n\nOn leave (${onLv.length}): ${onLv.map(l=>l.student_name).join(", ")}`;
+  if(ops.length)  m+=`\nOn outpass (${ops.length}): ${ops.map(o=>o.student_name+(o.returned_at?" (returned)":"")).join(", ")}`;
+  if(disc.length) m+=`\n\nDiscipline today (${disc.length}): ${disc.map(d=>d.student_name+" — "+d.category).join("; ")}`;
+  if(med.length)  m+=`\nMedical today (${med.length}): ${med.map(x=>x.student_name+" ("+x.severity+")").join(", ")}`;
+  if(compl.length)m+=`\nNew complaints: ${compl.length}`;
+  m+=`\n\nPrepared by: ${isAdmin()?"Principal":"Warden"}\nBaluni Hostel Management`;
+  $("#rpMsg").textContent=m; $("#rpOut").style.display="block"; $("#rpOut").dataset.msg=m;
+});
+$("#rpCopy").addEventListener("click",()=>copyText($("#rpOut").dataset.msg||""));
+$("#rpShare").addEventListener("click",()=>window.open("https://wa.me/?text="+encodeURIComponent($("#rpOut").dataset.msg||""),"_blank"));
+
+/* ================================================================
+   SETTINGS — principal password only
+   ================================================================ */
+$("#pwForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const err=$("#pwErr"); err.textContent="";
+  if(!isAdmin()){ err.textContent="Only the Principal can change passwords."; return; }
   if($("#pw_new").value!==$("#pw_conf").value){ err.textContent="Passwords don't match."; return; }
-  const { error }=await sb.auth.updateUser({ password:$("#pw_new").value });
+  const {error}=await sb.auth.updateUser({password:$("#pw_new").value});
   if(error){ err.textContent=error.message; return; }
-  $("#pwForm").reset();
-  toast("Password updated");
+  $("#pwForm").reset(); toast("Password updated");
 });
 </script>
 </body>
